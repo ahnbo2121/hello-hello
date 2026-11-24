@@ -27,6 +27,7 @@ cd hello-hello
 
 ```
 hello-hello/
+├── .gitignore
 ├── LICENSE
 └── README.md
 ```
