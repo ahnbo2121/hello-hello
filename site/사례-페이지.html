@@ -1,0 +1,342 @@
+<title>근태 전자결재 사례</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@500;700&family=Noto+Sans+KR:wght@400;500;700&family=Nanum+Pen+Script&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+/* Layout: 한 줄 세로 읽기(문제 → 사람 → 과업 → 해결 → 검증 → 나), 종이 서식은 모눈 위에 다시 그린 카드 */
+:root {
+  --paper: #f6f7f9;
+  --sheet: #ffffff;
+  --ink: #16202e;
+  --muted: #526073;
+  --rule: #d8dde5;
+  --grid: #e8ecf2;
+  --blue: #1f43b8;
+  --blue-soft: #eaf0ff;
+  --pencil: #a24a06;
+  --pencil-soft: #fff3e3;
+  --pen: #24336b;
+  --font-display: "IBM Plex Sans KR", "Noto Sans KR", system-ui, sans-serif;
+  --font-body: "Noto Sans KR", system-ui, sans-serif;
+  --font-hand: "Nanum Pen Script", "Noto Sans KR", cursive;
+  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #11151c; --sheet: #182029; --ink: #e8edf4; --muted: #a3b0c2; --rule: #2c3644; --grid: #1e2732;
+    --blue: #8fb0ff; --blue-soft: #1c2a4d; --pencil: #f2a65a; --pencil-soft: #3a2614; --pen: #b9c6f2;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #11151c; --sheet: #182029; --ink: #e8edf4; --muted: #a3b0c2; --rule: #2c3644; --grid: #1e2732;
+  --blue: #8fb0ff; --blue-soft: #1c2a4d; --pencil: #f2a65a; --pencil-soft: #3a2614; --pen: #b9c6f2;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  background: var(--paper); color: var(--ink);
+  font-family: var(--font-body); font-size: 16px; line-height: 1.7;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+.wrap { max-width: 880px; margin: 0 auto; padding-block: 56px 80px; display: flex; flex-direction: column; gap: 72px; }
+h1, h2, h3 { font-family: var(--font-display); text-wrap: balance; margin: 0; line-height: 1.3; }
+h1 { font-size: clamp(30px, 5vw, 44px); letter-spacing: -0.01em; }
+h2 { font-size: clamp(22px, 3.4vw, 28px); }
+h3 { font-size: 18px; }
+p { margin: 0; max-width: 65ch; }
+a { color: var(--blue); text-underline-offset: 3px; }
+a:focus-visible, button:focus-visible { outline: 2px solid var(--blue); outline-offset: 3px; border-radius: 4px; }
+.eyebrow { font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+section { display: flex; flex-direction: column; gap: 20px; }
+.lead { font-size: 18px; color: var(--muted); }
+.tag { display: inline-block; font-size: 12px; font-weight: 700; padding: 1px 8px; border-radius: 999px; vertical-align: 2px; margin-right: 6px; white-space: nowrap; }
+.tag.fact { background: var(--grid); color: var(--ink); }
+.tag.plan { background: var(--blue-soft); color: var(--blue); }
+.tag.hypo { background: var(--pencil-soft); color: var(--pencil); }
+
+/* hero */
+.hero { display: flex; flex-direction: column; gap: 20px; }
+.stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1px; background: var(--rule); border: 1px solid var(--rule); border-radius: 10px; overflow: hidden; }
+.stats div { background: var(--sheet); padding: 14px 16px; display: flex; flex-direction: column; gap: 2px; }
+.stats b { font-family: var(--font-display); font-size: 26px; font-variant-numeric: tabular-nums; }
+.stats span { font-size: 13px; color: var(--muted); }
+.me { display: flex; flex-wrap: wrap; gap: 8px 20px; font-size: 14px; color: var(--muted); }
+.me strong { color: var(--ink); }
+
+/* redrawn form */
+.sheet {
+  background-color: var(--sheet);
+  background-image: linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size: 20px 20px;
+  border: 1px solid var(--rule); border-radius: 6px; padding: 20px;
+  display: flex; flex-direction: column; gap: 12px;
+}
+.sheet-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+.sheet-head h3 { font-size: 17px; }
+.scroll { overflow-x: auto; }
+.form { width: 100%; min-width: 600px; border-collapse: collapse; background: var(--sheet); font-size: 13px; }
+.form th, .form td { border: 1px solid var(--rule); padding: 6px 8px; text-align: left; vertical-align: middle; }
+.form th { background: var(--grid); font-weight: 700; font-size: 12px; }
+.hand { font-family: var(--font-hand); font-size: 22px; color: var(--pen); line-height: 1.1; }
+.flag { outline: 2px dashed var(--pencil); outline-offset: -3px; }
+.num { display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 20px; border-radius: 50%; background: var(--pencil); color: var(--sheet); font-size: 12px; font-weight: 700; font-family: var(--font-mono); margin-left: 4px; vertical-align: 2px; }
+.notes { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.notes div { display: flex; gap: 10px; font-size: 14px; }
+.notes .num { flex-shrink: 0; margin: 3px 0 0; }
+.caption { font-size: 13px; color: var(--muted); }
+
+/* sources -> one person */
+.sources { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)) 40px minmax(0, 1.3fr); gap: 10px; align-items: stretch; }
+.src { background: var(--sheet); border: 1px solid var(--rule); border-radius: 8px; padding: 12px; font-size: 14px; display: flex; flex-direction: column; gap: 2px; }
+.src small { color: var(--muted); font-size: 12px; }
+.arrow { display: flex; align-items: center; justify-content: center; color: var(--muted); font-family: var(--font-mono); }
+.sink { background: var(--pencil-soft); border: 1px solid var(--pencil); border-radius: 8px; padding: 12px; font-size: 14px; display: flex; flex-direction: column; gap: 2px; }
+.sink b { color: var(--pencil); }
+
+/* personas */
+.chain { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; counter-reset: step; }
+.person { background: var(--sheet); border: 1px solid var(--rule); border-radius: 10px; padding: 16px; display: flex; flex-direction: column; gap: 8px; position: relative; }
+.person .role { font-family: var(--font-mono); font-size: 12px; color: var(--blue); }
+.person p { font-size: 14px; color: var(--muted); }
+
+/* jobs */
+.jobs { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; border-top: 1px solid var(--rule); }
+.jobs li { display: grid; grid-template-columns: 56px minmax(0, 1fr); gap: 12px; padding: 14px 0; border-bottom: 1px solid var(--rule); }
+.jobs .id { font-family: var(--font-mono); font-weight: 500; color: var(--blue); padding-top: 2px; }
+.jobs p { font-size: 15px; }
+.jobs em { font-style: normal; background: var(--pencil-soft); color: var(--pencil); padding: 0 3px; border-radius: 3px; }
+.jobs .who { font-size: 13px; color: var(--muted); }
+
+/* before / after */
+.ba { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.lane { border-radius: 10px; padding: 18px; display: flex; flex-direction: column; gap: 10px; }
+.lane.before { background: var(--sheet); border: 1px solid var(--rule); }
+.lane.after { background: var(--blue-soft); border: 1px solid var(--blue); }
+.lane ol { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 6px; font-size: 14px; }
+.lane h3 { font-size: 16px; }
+.screens { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 10px; }
+.screen { background: var(--sheet); border: 1px solid var(--rule); border-radius: 8px; padding: 12px; display: flex; flex-direction: column; gap: 2px; font-size: 14px; }
+.screen b { font-family: var(--font-mono); color: var(--blue); font-size: 13px; }
+.screen small { color: var(--muted); font-size: 12px; }
+.cta { display: inline-flex; align-items: center; gap: 8px; align-self: flex-start; min-height: 44px; padding: 0 18px; border-radius: 8px; background: var(--blue); color: var(--sheet); font-weight: 700; text-decoration: none; }
+.cta:hover { filter: brightness(1.08); }
+
+/* tables */
+.table { width: 100%; border-collapse: collapse; font-size: 14px; min-width: 560px; }
+.table th, .table td { padding: 10px 10px; border-bottom: 1px solid var(--rule); text-align: left; vertical-align: top; }
+.table th { font-size: 12px; color: var(--muted); font-weight: 700; }
+.sev { font-family: var(--font-mono); font-weight: 500; color: var(--pencil); white-space: nowrap; }
+.done { color: var(--blue); font-weight: 700; white-space: nowrap; }
+.bar { display: flex; height: 10px; border-radius: 999px; overflow: hidden; background: var(--grid); }
+.bar i { display: block; height: 100%; }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 13px; color: var(--muted); }
+.legend span::before { content: ""; display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 6px; vertical-align: -1px; background: var(--c); }
+
+/* me */
+.skills { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.skill { background: var(--sheet); border: 1px solid var(--rule); border-radius: 10px; padding: 16px; display: flex; flex-direction: column; gap: 6px; font-size: 14px; }
+.skill dl { margin: 0; display: grid; grid-template-columns: 40px minmax(0, 1fr); gap: 2px 8px; }
+.skill dt { font-weight: 700; color: var(--blue); font-size: 13px; }
+.skill dd { margin: 0; color: var(--muted); }
+.limits { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 6px; }
+footer { border-top: 1px solid var(--rule); padding-top: 20px; font-size: 13px; color: var(--muted); display: flex; flex-direction: column; gap: 6px; }
+
+@media (max-width: 720px) {
+  .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .notes, .chain, .ba, .skills { grid-template-columns: minmax(0, 1fr); }
+  .sources { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .sources .arrow { grid-column: 1 / -1; transform: rotate(90deg); height: 24px; }
+  .sources .sink { grid-column: 1 / -1; }
+}
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+
+<div class="wrap">
+
+  <header class="hero">
+    <span class="eyebrow">포트폴리오 사례 · 외식 매장 근태 업무 개선 제안</span>
+    <h1>매일 밤 네 곳을 맞춰 보던 근태를, 신청 한 번으로</h1>
+    <p class="lead">매장에서 일하며 본 종이 스케줄 변경 동의서와 밤마다 반복되는 근태 대조를 분석하고, 회사가 이미 쓰는 인사관리 앱(워크스캔)의 전자결재로 옮기는 방안과 화면을 설계했습니다.</p>
+    <div class="me">
+      <span><strong>작성자</strong> CJ푸드빌 매장 근무 경험이 있는 입사 지원자</span>
+      <span><strong>희망 직무</strong> 인사 · 영업</span>
+      <span><strong>범위</strong> 현장 관찰, 분석, 개선안, 와이어프레임 (코딩 없음)</span>
+    </div>
+    <div class="stats" aria-label="프로젝트 규모">
+      <div><b>20장</b><span>직접 본 서식·시스템 화면</span></div>
+      <div><b>4명</b><span>근태 흐름의 페르소나</span></div>
+      <div><b>5개</b><span>JTBD 과업</span></div>
+      <div><b>7개</b><span>제안 화면 (클릭 가능)</span></div>
+    </div>
+    <p class="caption"><span class="tag fact">관찰</span>현장에서 본 사실 <span class="tag plan">제안</span>작성자의 설계 <span class="tag hypo">가설</span>측정 전 목표. 페이지 전체에서 이 세 가지를 구분해 표시합니다.</p>
+  </header>
+
+  <section aria-labelledby="problem">
+    <span class="eyebrow">문제</span>
+    <h2 id="problem">근무시간이 바뀌면, 기록은 종이 세 장과 카톡에 흩어진다</h2>
+    <p><span class="tag fact">관찰</span>연장이나 근무 변경이 생기면 스텝은 지문을 찍고, 종이 동의서에 변경 전·후 시각과 연장시간을 손으로 적고 서명합니다. 같은 내용이 근무표 손글씨와 카톡 일일보고에도 남습니다.</p>
+
+    <div class="sheet">
+      <div class="sheet-head">
+        <h3>스케줄 변경 동의서 (다시 그린 예시)</h3>
+        <span class="caption">실제 서식 구조를 바탕으로 다시 그렸습니다. 이름·시각은 가상입니다.</span>
+      </div>
+      <div class="scroll">
+        <table class="form">
+          <thead>
+            <tr><th>NO</th><th>이름</th><th>본인 서명</th><th>변경 사유</th><th>변경 요청 시간</th><th>점장 확인</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>1</td><td class="hand">직원 A</td><td class="hand">A서명</td><td>연장근무 (✓)</td><td class="hand flag">11:00–20:00 → 11:00–21:40 (1.5h)<span class="num" aria-label="표시 1">1</span></td><td class="flag"><span class="num" aria-label="표시 2">2</span></td></tr>
+            <tr><td>2</td><td class="hand">직원 E</td><td class="hand">E서명</td><td>연장근무 (✓)</td><td class="hand">12:00–21:00 → 12:00–21:10 (1h)</td><td class="flag"></td></tr>
+            <tr><td>3</td><td class="hand">직원 G</td><td class="hand">G서명</td><td>사전협의 변경 (✓)</td><td class="hand">10:30–19:30 → 10:00–20:30</td><td class="flag"></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="notes">
+        <div><span class="num">1</span><span><b>시각 차이와 맞지 않는 연장시간.</b> 1시간 40분을 "1.5h", 10분을 "1h"로 적은 사례가 있었습니다. 계산 기준이 서식에 없습니다.</span></div>
+        <div><span class="num">2</span><span><b>비어 있는 점장 확인.</b> 사진으로 본 모든 날짜에서 이 칸이 비어 있었습니다. 승인 근거가 남지 않습니다.</span></div>
+        <div><span class="num">3</span><span><b>같은 변경이 여러 곳에.</b> 근무표 손글씨 퇴근 시각, 이 동의서, 카톡 보고를 함께 봐야 합니다.</span></div>
+      </div>
+    </div>
+
+    <div class="sources" role="img" aria-label="지문, 근무표, 동의서, 카톡 네 곳의 기록이 인턴매니저 한 사람에게 모여 매일 밤 대조된다">
+      <div class="src">지문 기록<small>누락·미인식 발생</small></div>
+      <div class="src">종이 근무표<small>실제 퇴근은 손글씨</small></div>
+      <div class="src">종이 동의서<small>연장시간 직접 계산</small></div>
+      <div class="src">카톡 일일보고<small>대화에 묻힘</small></div>
+      <div class="arrow" aria-hidden="true">→</div>
+      <div class="sink"><b>인턴매니저, 매일 밤 9시 이후</b>네 곳을 맞춰 사내 인사관리 시스템에 인정시간을 직접 입력</div>
+    </div>
+    <p><span class="tag fact">관찰</span>지문 기록은 회사의 별도 인사관리 시스템에 쌓이고, 워크스캔은 근로계약 때 말고는 거의 쓰이지 않았습니다. 워크스캔은 근무 스케줄 변경과 연장근무 신청을 전자결재로 처리할 수 있다고 소개된 앱입니다.</p>
+  </section>
+
+  <section aria-labelledby="people">
+    <span class="eyebrow">누가 겪나</span>
+    <h2 id="people">기록은 네 사람을 거쳐 올라간다</h2>
+    <div class="chain">
+      <div class="person"><span class="role">P1 스텝</span><h3>두 번 기록한다</h3><p>지문도 찍고 종이에도 쓴다. 마감 직후 연장시간을 직접 계산한다.</p></div>
+      <div class="person"><span class="role">P2 인턴매니저</span><h3>네 곳을 맞춘다</h3><p>지문, 근무표, 동의서, 카톡을 대조해 밤마다 입력한다.</p></div>
+      <div class="person"><span class="role">P3 슈퍼바이저</span><h3>종이를 다시 뒤진다</h3><p>연장 사유와 승인자를 확인하고, 매출 대비 인건비를 본다.</p></div>
+      <div class="person"><span class="role">P4 승인자</span><h3>서명할 때를 놓친다</h3><p>점장 또는 인사담당자. 바쁜 영업 중 확인 칸이 비어 간다.</p></div>
+    </div>
+    <p class="caption">페르소나는 관찰한 역할을 바탕으로 만든 가상 인물입니다.</p>
+  </section>
+
+  <section aria-labelledby="jobs">
+    <span class="eyebrow">과업 (JTBD)</span>
+    <h2 id="jobs">화면이 도와야 할 다섯 가지 일</h2>
+    <p>후보 10개 중, 신청 → 승인 → 입력 → 누락 처리 → 검토 흐름이 끊기지 않고 사진으로 근거를 댈 수 있는 5개를 골랐습니다. 문장마다 상황, 하려는 일, <em style="font-style:normal;background:var(--pencil-soft);color:var(--pencil);padding:0 3px;border-radius:3px">불편</em>, 빈도를 담았습니다.</p>
+    <ol class="jobs">
+      <li><span class="id">J1</span><div><p>마감이 늦어져 퇴근 직전일 때, 더 일한 시간을 정확히 남기고 바로 퇴근하고 싶지만, <em>종이에 연장시간을 직접 계산해 적고 서명해야</em> 해서 막힌다.</p><span class="who">스텝 · 연장이 생길 때마다</span></div></li>
+      <li><span class="id">J2</span><div><p>영업 중 변경·연장이 생겼을 때, 그 자리에서 승인하고 근거를 남기고 싶지만, <em>서명할 타이밍을 놓쳐</em> 확인 칸이 비게 된다.</p><span class="who">승인자 · 거의 매일</span></div></li>
+      <li><span class="id">J3</span><div><p>마감 후 밤 9시 넘어 매장 PC 앞에서, 인정시간을 입력하고 일마감하고 싶지만, <em>네 곳을 하나하나 맞춰 봐야</em> 해서 막힌다.</p><span class="who">인턴매니저 · 매일</span></div></li>
+      <li><span class="id">J4</span><div><p>지문 기록이 빈 직원을 발견했을 때, 실제 시각을 근거 있게 확정하고 싶지만, <em>근거가 흩어져 있어 직원에게 따로 물어야</em> 한다.</p><span class="who">인턴매니저 · 거의 매일</span></div></li>
+      <li><span class="id">J5</span><div><p>입력된 근태를 최종 점검할 때, 연장 사유와 승인자를 확인하고 싶지만, <em>정보가 종이에만 있어</em> 다시 뒤져야 한다.</p><span class="who">슈퍼바이저 · 검토할 때마다</span></div></li>
+    </ol>
+  </section>
+
+  <section aria-labelledby="solution">
+    <span class="eyebrow">해결</span>
+    <h2 id="solution">종이 동의서를 워크스캔 전자결재로</h2>
+    <p><span class="tag plan">제안</span>새 시스템을 들이지 않고, 회사가 이미 계약해 쓰는 앱의 기능을 넓혀 쓰는 방안입니다. 지문과 종이 근무표는 그대로 두고, 가장 문제가 분명한 동의서부터 옮깁니다.</p>
+    <div class="ba">
+      <div class="lane before">
+        <h3>지금</h3>
+        <ol>
+          <li>스텝이 종이에 시각·연장시간을 적고 서명</li>
+          <li>점장 확인 칸은 자주 비어 있음</li>
+          <li>근무표와 카톡에도 같은 내용</li>
+          <li>인턴매니저가 밤에 네 곳 대조 후 수기 입력</li>
+          <li>슈퍼바이저가 종이를 다시 넘겨보며 검토</li>
+        </ol>
+      </div>
+      <div class="lane after">
+        <h3>제안</h3>
+        <ol>
+          <li>스텝이 앱에서 사유를 고르고 시각 입력, 시간은 자동 계산</li>
+          <li>승인자가 알림을 받고 그 자리에서 승인, 기록이 남음</li>
+          <li>변경 내용은 앱 한 곳에만</li>
+          <li>인턴매니저는 승인 목록과 지문만 비교</li>
+          <li>슈퍼바이저는 사유·승인자를 목록으로 검토</li>
+        </ol>
+      </div>
+    </div>
+    <h3>제안 화면 7개</h3>
+    <div class="screens">
+      <div class="screen"><b>S1</b>연장·변경 신청<small>스텝 · 휴대폰 · J1</small></div>
+      <div class="screen"><b>S2</b>내 신청 현황<small>스텝 · 휴대폰 · J1</small></div>
+      <div class="screen"><b>S3</b>승인 요청 상세<small>승인자 · 휴대폰 · J2</small></div>
+      <div class="screen"><b>S4</b>미승인 목록<small>승인자 · 휴대폰 · J2</small></div>
+      <div class="screen"><b>S5</b>일일 근태 대조<small>인턴매니저 · PC · J3</small></div>
+      <div class="screen"><b>S6</b>지문 누락 처리<small>인턴매니저 · PC · J4</small></div>
+      <div class="screen"><b>S7</b>연장·변경 검토<small>슈퍼바이저 · PC · J5</small></div>
+    </div>
+    <a class="cta" href="https://claude.ai/artifact/8VcacdESZg8mKSicw4GsTw" target="_blank" rel="noopener">클릭 가능한 와이어프레임 열기 →</a>
+    <p class="caption">가상 데이터로 만든 제안 화면입니다. 워크스캔의 실제 화면이 아니며, 전자결재로 어디까지 구현할 수 있는지는 사내 확인이 필요합니다.</p>
+  </section>
+
+  <section aria-labelledby="check">
+    <span class="eyebrow">검증</span>
+    <h2 id="check">스스로 점검하고, 가장 큰 문제부터 고쳤다</h2>
+    <p>와이어프레임을 닐슨의 10가지 사용성 휴리스틱, 현장 기준(마감 직후 30초 안에 신청, 젖은 손으로 누르기, 그날 마감), 페르소나별 인지적 워크스루로 점검해 문제 19개를 찾았고, 그중 9개를 고쳤습니다.</p>
+    <div class="bar" role="img" aria-label="심각도 3 네 건, 2 아홉 건, 1 여섯 건">
+      <i style="width: 21%; background: var(--pencil)"></i>
+      <i style="width: 47.4%; background: var(--blue)"></i>
+      <i style="width: 31.6%; background: var(--muted)"></i>
+    </div>
+    <div class="legend">
+      <span style="--c: var(--pencil)">심각도 3 (큼) 4건</span>
+      <span style="--c: var(--blue)">심각도 2 (보통) 9건</span>
+      <span style="--c: var(--muted)">심각도 1 (작음) 6건</span>
+    </div>
+    <div class="scroll">
+      <table class="table">
+        <thead><tr><th>ID</th><th>문제</th><th>심각도</th><th>고친 내용</th></tr></thead>
+        <tbody>
+          <tr><td>U1</td><td>조기퇴근·지각을 골라도 화면이 연장 기준이라 잘못된 기록이 남음</td><td class="sev">3</td><td><span class="done">고침</span> 사유마다 바꾸는 시각과 계산 결과가 달라지고, 맞지 않으면 신청을 막고 이유를 알려 줌</td></tr>
+          <tr><td>U2</td><td>출근 시각을 바꿀 수 없음</td><td class="sev">3</td><td><span class="done">고침</span> 지각·사전협의 변경에서 출근 시각 입력</td></tr>
+          <tr><td>U3</td><td>정해진 5개 시각만 고를 수 있음</td><td class="sev">3</td><td><span class="done">고침</span> ±5분·±30분 버튼과 "지금 퇴근"으로 실제 시각 입력</td></tr>
+          <tr><td>U4</td><td>미승인 건 하나로 일마감이 끝까지 막힘</td><td class="sev">3</td><td><span class="done">고침</span> 막는 줄을 표시하고 "다음 날로 넘기기"로 예외 마감</td></tr>
+          <tr><td>U6</td><td>승인과 시각 선택을 되돌릴 수 없음</td><td class="sev">2</td><td><span class="done">고침</span> 승인 직후 "되돌리기", 대조 화면에 "다시 선택"</td></tr>
+          <tr><td>U7</td><td>승인 전 신청을 스텝이 취소할 수 없음</td><td class="sev">2</td><td><span class="done">고침</span> 내 신청 현황에 "신청 취소"</td></tr>
+          <tr><td>U8</td><td>반려 후 다시 신청하면 내용이 비어 있음</td><td class="sev">2</td><td><span class="done">고침</span> 이전 사유·시각과 반려 사유를 채운 채로 열림</td></tr>
+          <tr><td>U12</td><td>휴대폰이 없는 스텝을 위한 방법이 없음</td><td class="sev">2</td><td><span class="done">고침</span> 인턴매니저 "대리 신청", 직원이 나중에 확인</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p><span class="tag hypo">가설</span>도입하면 하루 대조 시간, 대조 자료 수(4곳 → 2곳 목표), 승인 공란 비율, 연장시간 표기 불일치 비율을 1~2주 측정해 비교할 계획입니다. 작성자는 지금 매장에서 근무하지 않아 실측값은 없습니다.</p>
+  </section>
+
+  <section aria-labelledby="me">
+    <span class="eyebrow">나</span>
+    <h2 id="me">이 프로젝트로 보여 주고 싶은 것</h2>
+    <div class="skills">
+      <div class="skill"><h3>현장 문제 발견</h3><dl><dt>인사</dt><dd>근태 기록 누락과 승인 근거 공란을 서식에서 찾음</dd><dt>영업</dt><dd>매장의 종이 업무 부담을 구체적으로 짚음</dd></dl></div>
+      <div class="skill"><h3>이해관계자 분석</h3><dl><dt>인사</dt><dd>스텝부터 인사담당자까지 역할별 요구 정리</dd><dt>영업</dt><dd>매장 인력 구조와 기록 흐름 이해</dd></dl></div>
+      <div class="skill"><h3>기준과 법 이해</h3><dl><dt>인사</dt><dd>근로계약서·임금명세서 교부 의무, 연장근무 동의</dd><dt>영업</dt><dd>매장이 지켜야 할 기록 기준</dd></dl></div>
+      <div class="skill"><h3>개선안과 실행 계획</h3><dl><dt>인사</dt><dd>이미 쓰는 HR 도구의 활용 확대, 측정 설계</dd><dt>영업</dt><dd>시범 운영 → 전환 → 확대, 매장용 가이드</dd></dl></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="limits">
+    <span class="eyebrow">한계와 다음 단계</span>
+    <h2 id="limits">아직 확인하지 못한 것</h2>
+    <ul class="limits">
+      <li>워크스캔 전자결재로 제안 화면을 어디까지 만들 수 있는지, 사내 인사관리 시스템과 연동되는지</li>
+      <li>앱 신청 기록이 종이 서명을 대신하는 동의 근거로 인정되는지</li>
+      <li>연장시간 인정 기준(30분 단위, 휴게 차감 등)</li>
+      <li>실제 사용자 테스트와 실측. 점검은 화면을 만든 쪽이 직접 한 것입니다.</li>
+      <li>남은 사용성 문제 10개 (승인 대기 건수 표시, 주 52시간 초과 경고, 확인 요청의 답변 대기 상태 등)</li>
+    </ul>
+  </section>
+
+  <footer>
+    <span>개인 포트폴리오이며 회사의 공식 자료가 아닙니다. 서식은 다시 그린 예시이고, 사람과 시각은 모두 가상입니다.</span>
+    <span>전체 문서: <a href="https://github.com/ahnbo2121/hello-hello" target="_blank" rel="noopener">github.com/ahnbo2121/hello-hello</a></span>
+  </footer>
+
+</div>

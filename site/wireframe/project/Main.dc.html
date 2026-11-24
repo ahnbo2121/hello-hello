@@ -1,0 +1,812 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>근태 전자결재 와이어프레임</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#1d4ed8}a:hover{color:#1e3a8a}
+button:focus-visible,input:focus-visible{outline:2px solid #1d4ed8;outline-offset:2px}
+</style>
+</helmet>
+<div style="width: 1440px; height: 1000px; box-sizing: border-box; display: flex; flex-direction: column; background: #f7f7f5; color: #1a1a1a; font-family: 'Noto Sans KR', system-ui, sans-serif; font-size: 14px">
+
+  <div style="height: 64px; flex-shrink: 0; display: flex; align-items: center; justify-content: space-between; padding: 0 32px; background: #ffffff; border-bottom: 1px solid #d9d9d6">
+    <div style="display: flex; align-items: baseline; gap: 14px">
+      <strong style="font-size: 18px">근태 전자결재 와이어프레임</strong>
+      <span style="color: #5c5c5c">스케줄 변경 동의서 → 전자결재 제안 화면 (S1~S7)</span>
+    </div>
+    <span style="color: #5c5c5c; font-size: 13px">이름·시각은 모두 가상 데이터 · 워크스캔 실제 화면이 아님</span>
+  </div>
+
+  <div style="flex: 1; display: flex; min-height: 0">
+
+    <nav aria-label="화면 목록" style="width: 260px; flex-shrink: 0; box-sizing: border-box; padding: 24px 16px; background: #ffffff; border-right: 1px solid #d9d9d6; display: flex; flex-direction: column; gap: 6px">
+      <div style="font-size: 12px; font-weight: 600; color: #5c5c5c; padding: 0 12px 8px">화면 (과업 흐름 순서)</div>
+      <sc-for list="{{navItems}}" as="n" hint-placeholder-count="7">
+        <button type="button" onClick="{{n.go}}" style="{{n.style}}">
+          <span style="font-weight: 700; width: 28px; flex-shrink: 0">{{n.code}}</span>
+          <span style="display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0">
+            <span style="font-weight: 600">{{n.label}}</span>
+            <span style="font-size: 12px; color: #5c5c5c">{{n.role}}</span>
+          </span>
+          <sc-if value="{{n.hasBadge}}" hint-placeholder-val="{{ false }}">
+            <span style="min-width: 22px; height: 22px; border-radius: 11px; background: #9a4a00; color: #ffffff; font-size: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center; padding: 0 6px; box-sizing: border-box">{{n.badge}}</span>
+          </sc-if>
+        </button>
+      </sc-for>
+      <div style="flex: 1"></div>
+      <button type="button" onClick="{{reset}}" style="min-height: 44px; border-radius: 10px; border: 1px solid #c9c9c5; background: #ffffff; font: inherit; color: #1a1a1a; cursor: pointer">처음부터 다시</button>
+    </nav>
+
+    <main style="flex: 1; min-width: 0; box-sizing: border-box; padding: 32px; display: flex; gap: 32px; align-items: flex-start">
+
+      <sc-if value="{{isPhone}}" hint-placeholder-val="{{ true }}">
+        <div style="width: 390px; height: 860px; flex-shrink: 0; box-sizing: border-box; border: 1px solid #c9c9c5; border-radius: 40px; background: #ffffff; overflow: hidden; display: flex; flex-direction: column">
+          <div style="height: 64px; flex-shrink: 0; display: flex; align-items: center; justify-content: space-between; padding: 0 24px; border-bottom: 1px solid #ececea">
+            <strong style="font-size: 17px">{{phoneTitle}}</strong>
+            <span style="font-size: 12px; color: #5c5c5c">{{phoneWho}}</span>
+          </div>
+          <div style="flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 16px">
+
+            <sc-if value="{{toastShow}}" hint-placeholder-val="{{ false }}">
+              <div role="status" style="padding: 12px 14px; border-radius: 10px; background: #eff4ff; color: #1d4ed8; font-weight: 600; display: flex; align-items: center; justify-content: space-between; gap: 10px">
+                <span>{{toastText}}</span>
+                <sc-if value="{{canUndo}}" hint-placeholder-val="{{ false }}"><button type="button" onClick="{{undo}}" style="flex-shrink: 0; min-height: 40px; padding: 0 12px; border-radius: 8px; border: 1px solid #1d4ed8; background: #ffffff; color: #1d4ed8; font: inherit; font-size: 13px; font-weight: 700; cursor: pointer">되돌리기</button></sc-if>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{isS1}}" hint-placeholder-val="{{ true }}">
+              <div style="display: flex; flex-direction: column; gap: 16px">
+                <sc-if value="{{proxyMode}}" hint-placeholder-val="{{ false }}">
+                  <div style="padding: 12px 14px; border-radius: 10px; background: #fff4e5; color: #9a4a00; font-weight: 600">인턴매니저가 직원 A 대신 입력 중 · 직원 A가 S2에서 내용을 확인합니다</div>
+                </sc-if>
+                <sc-if value="{{hasResubmitNote}}" hint-placeholder-val="{{ false }}">
+                  <div style="padding: 12px 14px; border-radius: 10px; background: #fff4e5; color: #9a4a00; font-weight: 600">반려 사유: {{resubmitNote}} · 이전 신청 내용을 채워 두었습니다</div>
+                </sc-if>
+                <div style="padding: 12px 16px; border-radius: 12px; background: #f7f7f5; display: flex; flex-direction: column; gap: 2px">
+                  <span style="font-size: 12px; color: #5c5c5c">오늘 내 근무 (8월 12일)</span>
+                  <strong style="font-size: 17px">계획 11:00–20:00</strong>
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 8px">
+                  <span style="font-weight: 600">사유</span>
+                  <div style="display: flex; flex-wrap: wrap; gap: 8px">
+                    <sc-for list="{{reasons}}" as="r" hint-placeholder-count="6">
+                      <button type="button" onClick="{{r.pick}}" style="{{r.style}}">{{r.label}}</button>
+                    </sc-for>
+                  </div>
+                </div>
+
+                <sc-if value="{{showStart}}" hint-placeholder-val="{{ false }}">
+                  <div style="display: flex; flex-direction: column; gap: 8px">
+                    <span style="font-weight: 600">{{startTitle}}</span>
+                    <div style="display: flex; align-items: center; gap: 6px">
+                      <sc-for list="{{startDown}}" as="sd" hint-placeholder-count="2">
+                        <button type="button" onClick="{{sd.go}}" aria-label="{{sd.aria}}" style="min-width: 56px; min-height: 44px; border-radius: 10px; border: 1px solid #c9c9c5; background: #ffffff; font: inherit; font-size: 13px; cursor: pointer">{{sd.label}}</button>
+                      </sc-for>
+                      <strong aria-live="polite" style="flex: 1; text-align: center; font-size: 22px">{{startValue}}</strong>
+                      <sc-for list="{{startUp}}" as="su" hint-placeholder-count="2">
+                        <button type="button" onClick="{{su.go}}" aria-label="{{su.aria}}" style="min-width: 56px; min-height: 44px; border-radius: 10px; border: 1px solid #c9c9c5; background: #ffffff; font: inherit; font-size: 13px; cursor: pointer">{{su.label}}</button>
+                      </sc-for>
+                    </div>
+                    <div style="display: flex; flex-wrap: wrap; gap: 8px">
+                      <sc-for list="{{startQuick}}" as="sq" hint-placeholder-count="3">
+                        <button type="button" onClick="{{sq.pick}}" style="{{sq.style}}">{{sq.label}}</button>
+                      </sc-for>
+                    </div>
+                  </div>
+                </sc-if>
+
+                <sc-if value="{{showEnd}}" hint-placeholder-val="{{ true }}">
+                  <div style="display: flex; flex-direction: column; gap: 8px">
+                    <span style="font-weight: 600">{{endTitle}}</span>
+                    <div style="display: flex; align-items: center; gap: 6px">
+                      <sc-for list="{{endDown}}" as="ed" hint-placeholder-count="2">
+                        <button type="button" onClick="{{ed.go}}" aria-label="{{ed.aria}}" style="min-width: 56px; min-height: 44px; border-radius: 10px; border: 1px solid #c9c9c5; background: #ffffff; font: inherit; font-size: 13px; cursor: pointer">{{ed.label}}</button>
+                      </sc-for>
+                      <strong aria-live="polite" style="flex: 1; text-align: center; font-size: 22px">{{endValue}}</strong>
+                      <sc-for list="{{endUp}}" as="eu" hint-placeholder-count="2">
+                        <button type="button" onClick="{{eu.go}}" aria-label="{{eu.aria}}" style="min-width: 56px; min-height: 44px; border-radius: 10px; border: 1px solid #c9c9c5; background: #ffffff; font: inherit; font-size: 13px; cursor: pointer">{{eu.label}}</button>
+                      </sc-for>
+                    </div>
+                    <div style="display: flex; flex-wrap: wrap; gap: 8px">
+                      <sc-for list="{{endQuick}}" as="eq" hint-placeholder-count="4">
+                        <button type="button" onClick="{{eq.pick}}" style="{{eq.style}}">{{eq.label}}</button>
+                      </sc-for>
+                    </div>
+                  </div>
+                </sc-if>
+
+                <div style="{{resultBoxStyle}}">
+                  <span style="font-size: 12px; color: #33415c">{{resultLabel}}</span>
+                  <strong style="{{resultValueStyle}}">{{resultValue}}</strong>
+                  <span style="font-size: 13px; color: #33415c">{{resultSub}}</span>
+                  <span style="font-size: 12px; color: #5c5c5c">회사 인정 기준(30분 단위, 휴게 차감 등)이 정해지면 그 기준으로 계산합니다.</span>
+                </div>
+                <label style="display: flex; gap: 10px; align-items: flex-start; cursor: pointer; line-height: 1.5">
+                  <input type="checkbox" checked="{{agreed}}" onChange="{{toggleAgree}}" style="width: 22px; height: 22px; margin: 0; flex-shrink: 0">
+                  <span>위 근로시간 변경에 동의합니다. (지금 종이 근무표의 동의 문구)</span>
+                </label>
+                <sc-if value="{{hasBlockMsg}}" hint-placeholder-val="{{ false }}">
+                  <span role="status" style="font-size: 13px; color: #9a4a00; font-weight: 600">{{blockMsg}}</span>
+                </sc-if>
+                <button type="button" onClick="{{submit}}" disabled="{{submitDisabled}}" style="{{submitStyle}}">신청하기</button>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{isS2}}" hint-placeholder-val="{{ false }}">
+              <div style="display: flex; flex-direction: column; gap: 12px">
+                <sc-if value="{{noMyReqs}}" hint-placeholder-val="{{ false }}">
+                  <div style="padding: 24px 16px; border-radius: 12px; background: #f7f7f5; color: #5c5c5c; text-align: center; line-height: 1.6">아직 신청한 내역이 없습니다.<br>S1에서 신청해 보세요.</div>
+                </sc-if>
+                <sc-for list="{{myReqs}}" as="q" hint-placeholder-count="1">
+                  <div style="padding: 16px; border-radius: 12px; border: 1px solid #d9d9d6; display: flex; flex-direction: column; gap: 8px">
+                    <div style="display: flex; justify-content: space-between; align-items: center">
+                      <span style="color: #5c5c5c; font-size: 13px">8월 12일 · {{q.reason}}</span>
+                      <span style="{{q.chipStyle}}">{{q.status}}</span>
+                    </div>
+                    <strong style="font-size: 16px">{{q.change}}</strong>
+                    <span>{{q.amount}}</span>
+                    <sc-if value="{{q.isApproved}}" hint-placeholder-val="{{ false }}">
+                      <span style="font-size: 13px; color: #5c5c5c">승인: {{q.approver}} · {{q.at}}</span>
+                    </sc-if>
+                    <sc-if value="{{q.proxyPending}}" hint-placeholder-val="{{ false }}">
+                      <span style="font-size: 13px; color: #9a4a00">인턴매니저가 대신 입력한 신청입니다. 내용이 맞는지 확인해 주세요.</span>
+                      <button type="button" onClick="{{q.proxyConfirm}}" style="min-height: 44px; border-radius: 10px; border: 1px solid #1d4ed8; background: #ffffff; color: #1d4ed8; font: inherit; font-weight: 600; cursor: pointer">내용이 맞습니다</button>
+                    </sc-if>
+                    <sc-if value="{{q.proxyDone}}" hint-placeholder-val="{{ false }}">
+                      <span style="font-size: 13px; color: #5c5c5c">대리 입력 · 본인 확인 완료</span>
+                    </sc-if>
+                    <sc-if value="{{q.canCancel}}" hint-placeholder-val="{{ false }}">
+                      <button type="button" onClick="{{q.cancel}}" style="min-height: 44px; border-radius: 10px; border: 1px solid #c9c9c5; background: #ffffff; color: #1a1a1a; font: inherit; cursor: pointer">신청 취소</button>
+                    </sc-if>
+                    <sc-if value="{{q.isRejected}}" hint-placeholder-val="{{ false }}">
+                      <span style="font-size: 13px; color: #9a4a00">반려 사유: {{q.rejectReason}}</span>
+                      <button type="button" onClick="{{q.resubmit}}" style="min-height: 44px; border-radius: 10px; border: 1px solid #1d4ed8; background: #ffffff; color: #1d4ed8; font: inherit; font-weight: 600; cursor: pointer">수정해서 다시 신청</button>
+                    </sc-if>
+                  </div>
+                </sc-for>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{isS3}}" hint-placeholder-val="{{ false }}">
+              <div style="display: flex; flex-direction: column; gap: 14px">
+                <sc-if value="{{hasTarget}}" hint-placeholder-val="{{ true }}">
+                  <div style="padding: 12px 14px; border-radius: 10px; background: #fff4e5; color: #9a4a00; font-weight: 600">승인 요청 1건 · 영업 중 알림</div>
+                  <div style="padding: 16px; border-radius: 12px; border: 1px solid #d9d9d6; display: flex; flex-direction: column; gap: 10px">
+                    <div style="display: flex; justify-content: space-between"><span style="color: #5c5c5c">신청자</span><strong>{{t.who}}</strong></div>
+                    <div style="display: flex; justify-content: space-between"><span style="color: #5c5c5c">사유</span><strong>{{t.reason}}</strong></div>
+                    <div style="display: flex; justify-content: space-between; gap: 12px"><span style="color: #5c5c5c">변경</span><strong style="text-align: right">{{t.change}}</strong></div>
+                    <div style="display: flex; justify-content: space-between; gap: 12px"><span style="color: #5c5c5c">변경 내용</span><strong style="color: #1d4ed8; text-align: right">{{t.amount}}</strong></div>
+                    <div style="padding-top: 10px; border-top: 1px solid #ececea; font-size: 13px; color: #5c5c5c">이번 주 누적(가상) 41시간 10분 · 주 52시간 이내</div>
+                  </div>
+                  <button type="button" onClick="{{approve}}" style="min-height: 52px; border-radius: 12px; border: 0; background: #1d4ed8; color: #ffffff; font: inherit; font-size: 16px; font-weight: 700; cursor: pointer">승인</button>
+                  <div style="display: flex; flex-direction: column; gap: 8px">
+                    <span style="font-size: 13px; color: #5c5c5c">반려하려면 사유를 먼저 고르세요</span>
+                    <div style="display: flex; flex-wrap: wrap; gap: 8px">
+                      <sc-for list="{{rejectReasons}}" as="rr" hint-placeholder-count="2">
+                        <button type="button" onClick="{{rr.pick}}" style="{{rr.style}}">{{rr.label}}</button>
+                      </sc-for>
+                    </div>
+                    <button type="button" onClick="{{reject}}" disabled="{{rejectDisabled}}" style="{{rejectStyle}}">반려</button>
+                  </div>
+                </sc-if>
+                <sc-if value="{{noTarget}}" hint-placeholder-val="{{ false }}">
+                  <div style="padding: 24px 16px; border-radius: 12px; background: #f7f7f5; color: #5c5c5c; text-align: center; line-height: 1.6">처리할 승인 요청이 없습니다.</div>
+                  <button type="button" onClick="{{goS1}}" style="min-height: 44px; border-radius: 10px; border: 1px solid #1d4ed8; background: #ffffff; color: #1d4ed8; font: inherit; font-weight: 600; cursor: pointer">S1에서 신청 만들기</button>
+                </sc-if>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{isS4}}" hint-placeholder-val="{{ false }}">
+              <div style="display: flex; flex-direction: column; gap: 12px">
+                <div style="display: flex; justify-content: space-between; align-items: center">
+                  <strong>미승인 {{pendingCount}}건</strong>
+                  <span style="font-size: 12px; color: #5c5c5c">오래된 순</span>
+                </div>
+                <sc-if value="{{noPending}}" hint-placeholder-val="{{ false }}">
+                  <div style="padding: 24px 16px; border-radius: 12px; background: #eff4ff; color: #1d4ed8; text-align: center; font-weight: 600">미승인 0건 · 일마감할 수 있습니다</div>
+                </sc-if>
+                <sc-for list="{{pendingItems}}" as="p" hint-placeholder-count="2">
+                  <label style="padding: 14px; border-radius: 12px; border: 1px solid #d9d9d6; display: flex; gap: 12px; align-items: flex-start; cursor: pointer">
+                    <input type="checkbox" checked="{{p.checked}}" onChange="{{p.toggle}}" style="width: 22px; height: 22px; margin: 2px 0 0; flex-shrink: 0">
+                    <span style="display: flex; flex-direction: column; gap: 4px; flex: 1">
+                      <span style="display: flex; justify-content: space-between"><strong>{{p.who}}</strong><span style="{{p.chipStyle}}">{{p.status}}</span></span>
+                      <span style="font-size: 13px; color: #5c5c5c">{{p.reason}} · {{p.change}}</span>
+                      <span style="font-size: 13px">{{p.amount}}</span>
+                    </span>
+                  </label>
+                </sc-for>
+                <button type="button" onClick="{{bulkApprove}}" disabled="{{bulkDisabled}}" style="{{bulkStyle}}">선택 {{checkedCount}}건 일괄 승인</button>
+              </div>
+            </sc-if>
+
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{isPc}}" hint-placeholder-val="{{ false }}">
+        <div style="width: 776px; flex-shrink: 0; box-sizing: border-box; border: 1px solid #c9c9c5; border-radius: 12px; background: #ffffff; overflow: hidden; display: flex; flex-direction: column">
+          <div style="height: 52px; flex-shrink: 0; display: flex; align-items: center; justify-content: space-between; padding: 0 24px; border-bottom: 1px solid #ececea; background: #fafaf9">
+            <strong style="font-size: 16px">{{pcTitle}}</strong>
+            <span style="font-size: 12px; color: #5c5c5c">{{pcWho}}</span>
+          </div>
+          <div style="padding: 20px 24px 24px; display: flex; flex-direction: column; gap: 16px">
+
+            <sc-if value="{{toastShow}}" hint-placeholder-val="{{ false }}">
+              <div role="status" style="padding: 12px 14px; border-radius: 10px; background: #eff4ff; color: #1d4ed8; font-weight: 600">{{toastText}}</div>
+            </sc-if>
+
+            <sc-if value="{{isS5}}" hint-placeholder-val="{{ false }}">
+              <div style="display: flex; flex-direction: column; gap: 14px">
+                <div style="display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap">
+                  <div style="display: flex; gap: 8px; flex-wrap: wrap">
+                    <span style="padding: 4px 10px; border-radius: 999px; background: #eff4ff; color: #1d4ed8; font-size: 13px; font-weight: 600">일치 {{okCount}}</span>
+                    <span style="padding: 4px 10px; border-radius: 999px; background: #fff4e5; color: #9a4a00; font-size: 13px; font-weight: 600">확인 필요 {{issueCount}}</span>
+                    <span style="padding: 4px 10px; border-radius: 999px; background: #f0f0ee; color: #4a4a4a; font-size: 13px; font-weight: 600">처리 완료 {{resolvedCount}}/{{rowCount}}</span>
+                  </div>
+                  <button type="button" onClick="{{toggleIssues}}" style="min-height: 40px; padding: 0 14px; border-radius: 8px; border: 1px solid #c9c9c5; background: #ffffff; font: inherit; font-size: 13px; cursor: pointer">{{issuesLabel}}</button>
+                </div>
+                <div style="border: 1px solid #ececea; border-radius: 10px; overflow: hidden">
+                  <div style="display: grid; grid-template-columns: 52px 92px 96px 100px 100px 84px minmax(0, 1fr); gap: 8px; padding: 10px 12px; background: #fafaf9; font-size: 12px; font-weight: 600; color: #4a4a4a">
+                    <span>직원</span><span>계획</span><span>지문</span><span>승인된 신청</span><span>제안 인정</span><span>상태</span><span>처리</span>
+                  </div>
+                  <sc-for list="{{rows}}" as="w" hint-placeholder-count="7">
+                    <div style="display: grid; grid-template-columns: 52px 92px 96px 100px 100px 84px minmax(0, 1fr); gap: 8px; padding: 10px 12px; border-top: 1px solid #ececea; align-items: center; font-size: 13px">
+                      <strong>{{w.id}}</strong>
+                      <span>{{w.plan}}</span>
+                      <span>{{w.fp}}</span>
+                      <span>{{w.req}}</span>
+                      <span style="font-weight: 600">{{w.suggest}}</span>
+                      <span style="{{w.chipStyle}}">{{w.statusLabel}}</span>
+                      <span style="display: flex; gap: 6px; flex-wrap: wrap; align-items: center">
+                        <sc-if value="{{w.isConfirmed}}" hint-placeholder-val="{{ false }}"><span style="color: #1d4ed8; font-weight: 600">확정됨</span></sc-if>
+                        <sc-if value="{{w.canRepick}}" hint-placeholder-val="{{ false }}"><button type="button" onClick="{{w.repick}}" style="min-height: 36px; padding: 0 10px; border-radius: 8px; border: 1px solid #c9c9c5; background: #ffffff; font: inherit; font-size: 12px; cursor: pointer">다시 선택</button></sc-if>
+                        <sc-if value="{{w.canProxy}}" hint-placeholder-val="{{ false }}"><button type="button" onClick="{{w.proxyGo}}" style="min-height: 36px; padding: 0 10px; border-radius: 8px; border: 1px solid #9a4a00; background: #ffffff; color: #9a4a00; font: inherit; font-size: 12px; font-weight: 600; cursor: pointer">대리 신청 →</button></sc-if>
+                        <sc-if value="{{w.canFix}}" hint-placeholder-val="{{ false }}"><button type="button" onClick="{{goS6}}" style="min-height: 36px; padding: 0 10px; border-radius: 8px; border: 1px solid #9a4a00; background: #ffffff; color: #9a4a00; font: inherit; font-size: 12px; font-weight: 600; cursor: pointer">누락 처리 →</button></sc-if>
+                        <sc-if value="{{w.canRemind}}" hint-placeholder-val="{{ false }}"><button type="button" onClick="{{w.remind}}" style="min-height: 36px; padding: 0 10px; border-radius: 8px; border: 1px solid #c9c9c5; background: #ffffff; font: inherit; font-size: 12px; cursor: pointer">승인자 다시 알림</button></sc-if>
+                        <sc-if value="{{w.wasReminded}}" hint-placeholder-val="{{ false }}"><span style="font-size: 12px; color: #5c5c5c">알림 보냄</span></sc-if>
+                        <sc-if value="{{w.canDefer}}" hint-placeholder-val="{{ false }}"><button type="button" onClick="{{w.defer}}" style="min-height: 36px; padding: 0 10px; border-radius: 8px; border: 1px solid #c9c9c5; background: #ffffff; font: inherit; font-size: 12px; cursor: pointer">다음 날로 넘기기</button></sc-if>
+                        <sc-if value="{{w.canPick}}" hint-placeholder-val="{{ false }}">
+                          <button type="button" onClick="{{w.pickA}}" style="min-height: 36px; padding: 0 8px; border-radius: 8px; border: 1px solid #1d4ed8; background: #ffffff; color: #1d4ed8; font: inherit; font-size: 12px; cursor: pointer">{{w.pickALabel}}</button>
+                          <button type="button" onClick="{{w.pickB}}" style="min-height: 36px; padding: 0 8px; border-radius: 8px; border: 1px solid #1d4ed8; background: #ffffff; color: #1d4ed8; font: inherit; font-size: 12px; cursor: pointer">{{w.pickBLabel}}</button>
+                        </sc-if>
+                      </span>
+                    </div>
+                  </sc-for>
+                </div>
+                <div style="display: flex; gap: 12px; justify-content: space-between; align-items: flex-start; flex-wrap: wrap">
+                  <div style="flex: 1; min-width: 240px; display: flex; flex-direction: column; gap: 4px">
+                    <sc-if value="{{hasBlockers}}" hint-placeholder-val="{{ true }}">
+                      <span role="status" style="font-size: 13px; color: #9a4a00; font-weight: 600">마감을 막는 줄 {{blockerCount}}건: {{blockerText}}</span>
+                      <span style="font-size: 12px; color: #5c5c5c">미승인 건은 "다음 날로 넘기기"로 기록을 남기고 오늘 마감할 수 있습니다.</span>
+                    </sc-if>
+                    <sc-if value="{{noBlockers}}" hint-placeholder-val="{{ false }}">
+                      <span style="font-size: 13px; color: #1d4ed8; font-weight: 600">모든 줄이 처리되었습니다. 일마감할 수 있습니다.</span>
+                    </sc-if>
+                  </div>
+                  <div style="display: flex; gap: 10px; flex-wrap: wrap">
+                    <button type="button" onClick="{{bulkConfirm}}" disabled="{{bulkConfirmDisabled}}" style="{{bulkConfirmStyle}}">일치 {{okUnconfirmed}}건 한 번에 확정</button>
+                    <button type="button" onClick="{{closeDay}}" disabled="{{closeDisabled}}" style="{{closeStyle}}">{{closeLabel}}</button>
+                  </div>
+                </div>
+                <span style="font-size: 12px; color: #5c5c5c">가설: 지문과 기준 시각(계획 또는 승인된 신청)의 차이가 5분 이내면 일치로 봅니다. 확정 결과는 사내 인사관리 시스템에 옮깁니다(연동되면 자동 반영).</span>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{isS6}}" hint-placeholder-val="{{ false }}">
+              <div style="display: flex; flex-direction: column; gap: 16px">
+                <div style="padding: 14px 16px; border-radius: 10px; background: #fff4e5; color: #9a4a00; font-weight: 600">직원 C · 8월 12일 · 출근 지문 없음 (계획 12:00–21:00)</div>
+                <sc-if value="{{cDone}}" hint-placeholder-val="{{ false }}">
+                  <div style="padding: 14px 16px; border-radius: 10px; background: #eff4ff; color: #1d4ed8; font-weight: 600">처리 완료 · 출근 {{cPickLabel}} · 사유: {{cReasonLabel}}</div>
+                  <button type="button" onClick="{{goS5}}" style="align-self: flex-start; min-height: 44px; padding: 0 16px; border-radius: 10px; border: 1px solid #1d4ed8; background: #ffffff; color: #1d4ed8; font: inherit; font-weight: 600; cursor: pointer">← S5 대조로 돌아가기</button>
+                </sc-if>
+                <sc-if value="{{cOpen}}" hint-placeholder-val="{{ true }}">
+                  <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px">
+                    <div style="display: flex; flex-direction: column; gap: 10px">
+                      <strong>근거 후보</strong>
+                      <div style="font-size: 13px; color: #5c5c5c; line-height: 1.6">승인된 신청: 없음<br>같은 날 퇴근 지문: 21:05 (출근 근거로는 쓰지 않음)</div>
+                      <div style="display: flex; flex-wrap: wrap; gap: 8px">
+                        <sc-for list="{{cCandidates}}" as="c" hint-placeholder-count="1">
+                          <button type="button" onClick="{{c.pick}}" style="{{c.style}}">{{c.label}}</button>
+                        </sc-for>
+                      </div>
+                      <sc-if value="{{cCanRequest}}" hint-placeholder-val="{{ true }}">
+                        <button type="button" onClick="{{cRequest}}" style="align-self: flex-start; min-height: 40px; padding: 0 14px; border-radius: 8px; border: 1px solid #c9c9c5; background: #ffffff; font: inherit; font-size: 13px; cursor: pointer">근거가 없으면: 직원에게 확인 요청</button>
+                      </sc-if>
+                      <sc-if value="{{cRequested}}" hint-placeholder-val="{{ false }}">
+                        <span style="font-size: 12px; color: #5c5c5c">직원 C가 S2에서 실제 출근 시각을 답했습니다(가상). 후보에 추가됨.</span>
+                      </sc-if>
+                    </div>
+                    <div style="display: flex; flex-direction: column; gap: 10px">
+                      <strong>누락 사유</strong>
+                      <span style="font-size: 13px; color: #5c5c5c">사내 인사관리 시스템의 "지문 누락사유" 항목과 맞춤</span>
+                      <div style="display: flex; flex-wrap: wrap; gap: 8px">
+                        <sc-for list="{{cReasons}}" as="cr" hint-placeholder-count="4">
+                          <button type="button" onClick="{{cr.pick}}" style="{{cr.style}}">{{cr.label}}</button>
+                        </sc-for>
+                      </div>
+                    </div>
+                  </div>
+                  <button type="button" onClick="{{cConfirm}}" disabled="{{cConfirmDisabled}}" style="{{cConfirmStyle}}">출근 시각 확정</button>
+                </sc-if>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{isS7}}" hint-placeholder-val="{{ false }}">
+              <div style="display: flex; flex-direction: column; gap: 14px">
+                <div style="display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap">
+                  <div style="display: flex; gap: 8px">
+                    <sc-for list="{{ranges}}" as="rg" hint-placeholder-count="2">
+                      <button type="button" onClick="{{rg.pick}}" style="{{rg.style}}">{{rg.label}}</button>
+                    </sc-for>
+                  </div>
+                  <span style="font-size: 14px">연장 합계 <strong style="color: #1d4ed8">{{extTotal}}</strong> · {{reviewRowCount}}건</span>
+                </div>
+                <div style="border: 1px solid #ececea; border-radius: 10px; overflow: hidden">
+                  <div style="display: grid; grid-template-columns: 44px 44px 88px 80px 76px 64px 120px minmax(0, 1fr); gap: 8px; padding: 10px 12px; background: #fafaf9; font-size: 12px; font-weight: 600; color: #4a4a4a">
+                    <span>날짜</span><span>직원</span><span>사유</span><span>증감</span><span>승인자</span><span>승인 시각</span><span>신청 → 입력</span><span>일치</span>
+                  </div>
+                  <sc-for list="{{reviewRows}}" as="v" hint-placeholder-count="4">
+                    <div style="display: grid; grid-template-columns: 44px 44px 88px 80px 76px 64px 120px minmax(0, 1fr); gap: 8px; padding: 10px 12px; border-top: 1px solid #ececea; align-items: center; font-size: 13px">
+                      <span>{{v.date}}</span>
+                      <strong>{{v.who}}</strong>
+                      <span>{{v.reason}}</span>
+                      <span>{{v.ext}}</span>
+                      <span>{{v.approver}}</span>
+                      <span>{{v.at}}</span>
+                      <span>{{v.compare}}</span>
+                      <span style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap">
+                        <span style="{{v.chipStyle}}">{{v.matchLabel}}</span>
+                        <sc-if value="{{v.canRequestFix}}" hint-placeholder-val="{{ false }}"><button type="button" onClick="{{v.requestFix}}" style="min-height: 32px; padding: 0 8px; border-radius: 8px; border: 1px solid #9a4a00; background: #ffffff; color: #9a4a00; font: inherit; font-size: 12px; cursor: pointer">수정 요청</button></sc-if>
+                        <sc-if value="{{v.fixSent}}" hint-placeholder-val="{{ false }}"><span style="font-size: 12px; color: #5c5c5c">요청 보냄</span></sc-if>
+                      </span>
+                    </div>
+                  </sc-for>
+                </div>
+                <sc-if value="{{hasBeforeEntry}}" hint-placeholder-val="{{ false }}">
+                  <span style="font-size: 13px; color: #9a4a00">입력 전 {{beforeEntryCount}}건 · S5에서 확정한 뒤 검토할 수 있습니다.</span>
+                </sc-if>
+                <div style="display: flex; justify-content: flex-end">
+                  <button type="button" onClick="{{reviewDone}}" disabled="{{reviewDisabled}}" style="{{reviewStyle}}">{{reviewLabel}}</button>
+                </div>
+              </div>
+            </sc-if>
+
+          </div>
+        </div>
+      </sc-if>
+
+      <aside aria-label="화면 설명" style="flex: 1; min-width: 260px; max-width: 360px; display: flex; flex-direction: column; gap: 16px">
+        <div style="padding: 20px; border-radius: 14px; background: #ffffff; border: 1px solid #d9d9d6; display: flex; flex-direction: column; gap: 12px">
+          <strong style="font-size: 18px">{{note.title}}</strong>
+          <div style="display: flex; flex-direction: column; gap: 2px"><span style="font-size: 12px; color: #5c5c5c">사용자</span><span>{{note.user}}</span></div>
+          <div style="display: flex; flex-direction: column; gap: 2px"><span style="font-size: 12px; color: #5c5c5c">JTBD 과업</span><span>{{note.job}}</span></div>
+          <div style="display: flex; flex-direction: column; gap: 2px"><span style="font-size: 12px; color: #5c5c5c">없앨 불편 (지금 종이 방식)</span><span>{{note.pain}}</span></div>
+        </div>
+        <div style="padding: 20px; border-radius: 14px; background: #eff4ff; display: flex; flex-direction: column; gap: 8px">
+          <strong style="color: #1d4ed8">해 보기</strong>
+          <span style="line-height: 1.6; color: #1e2a4a">{{note.tryIt}}</span>
+        </div>
+        <div style="padding: 16px 20px; border-radius: 14px; border: 1px dashed #c9c9c5; font-size: 13px; color: #5c5c5c; line-height: 1.6">제안 화면입니다. 워크스캔 전자결재로 어디까지 구현할 수 있는지는 사내 확인이 필요합니다. 성공 기준과 계산 규칙은 측정 전 가설입니다.</div>
+      </aside>
+
+    </main>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1000}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = this.initial();
+  }
+
+  initial() {
+    return {
+      screen: 's1', reason: '연장근무', start: '11:00', end: '21:40', agreed: false,
+      requests: [
+        { id: 'r1', who: 'B', reason: '연장근무', planStart: '09:30', planEnd: '18:30', from: '09:30', to: '19:30', status: '승인됨', approver: '점장', at: '18:20', rejectReason: '' },
+        { id: 'r2', who: 'D', reason: '연장근무', planStart: '11:30', planEnd: '20:30', from: '11:30', to: '21:30', status: '승인됨', approver: '점장', at: '20:10', rejectReason: '' },
+        { id: 'r3', who: 'E', reason: '연장근무', planStart: '10:30', planEnd: '19:30', from: '10:30', to: '22:13', status: '승인됨', approver: '인사담당자', at: '21:00', rejectReason: '' },
+        { id: 'r4', who: 'G', reason: '사전협의 변경', planStart: '12:00', planEnd: '21:00', from: '12:00', to: '21:10', status: '미승인', approver: '', at: '', rejectReason: '' }
+      ],
+      toast: null, rejectReason: '', checked: {}, onlyIssues: false,
+      confirmed: {}, reminded: {}, deferred: {}, choice: {},
+      fixedC: false, cPick: '', cReason: '', cRequested: false,
+      closed: false, range: 'today', fixSent: {}, reviewed: false,
+      lastApproval: null, proxy: false, resubmitNote: ''
+    };
+  }
+
+  renderVals() {
+    const s = this.state;
+    const T = (x) => { const p = x.split(':').map(Number); return p[0] * 60 + p[1]; };
+    const F = (m) => { const h = Math.floor(m / 60), mm = m % 60; return (h < 10 ? '0' : '') + h + ':' + (mm < 10 ? '0' : '') + mm; };
+    const D = (m) => { m = Math.max(0, m); const h = Math.floor(m / 60), mm = m % 60; return h > 0 ? (h + '시간' + (mm ? ' ' + mm + '분' : '')) : (mm + '분'); };
+    const pill = (on) => 'padding: 0 14px; min-height: 44px; border-radius: 999px; border: 1px solid ' + (on ? '#1d4ed8' : '#c9c9c5') + '; background: ' + (on ? '#eff4ff' : '#ffffff') + '; color: ' + (on ? '#1d4ed8' : '#1a1a1a') + '; font: inherit; font-size: 14px; font-weight: ' + (on ? '600' : '400') + '; cursor: pointer';
+    const chip = (k) => {
+      const c = { ok: ['#eff4ff', '#1d4ed8'], warn: ['#fff4e5', '#9a4a00'], pend: ['#f0f0ee', '#4a4a4a'] }[k];
+      return 'display: inline-block; padding: 3px 8px; border-radius: 999px; background: ' + c[0] + '; color: ' + c[1] + '; font-size: 12px; font-weight: 600; white-space: nowrap';
+    };
+    const primary = (dis) => 'min-height: 48px; padding: 0 20px; border-radius: 12px; border: 0; background: #1d4ed8; color: #ffffff; font: inherit; font-size: 15px; font-weight: 700; cursor: ' + (dis ? 'not-allowed' : 'pointer') + '; opacity: ' + (dis ? '0.4' : '1');
+    const secondary = (dis) => 'min-height: 48px; padding: 0 18px; border-radius: 12px; border: 1px solid #9a4a00; background: #ffffff; color: #9a4a00; font: inherit; font-size: 15px; font-weight: 600; cursor: ' + (dis ? 'not-allowed' : 'pointer') + '; opacity: ' + (dis ? '0.4' : '1');
+    const isPend = (r) => r.status === '신청됨' || r.status === '미승인';
+    const go = (sc) => () => this.setState({ screen: sc, toast: null, proxy: false, resubmitNote: '' });
+
+    // 신청 한 건을 사람이 읽을 문장으로
+    const describe = (r) => {
+      const plan = r.planStart + '–' + r.planEnd;
+      const planLen = T(r.planEnd) - T(r.planStart);
+      if (r.reason === '결근') return { change: plan + ' → 결근', amount: '결근 (근무 없음)', short: '결근', extMin: 0 };
+      const change = plan + ' → ' + r.from + '–' + r.to;
+      if (r.reason === '연장근무') { const m = T(r.to) - T(r.planEnd); return { change, amount: '연장 ' + D(m), short: '+' + D(m), extMin: m }; }
+      if (r.reason === '조기퇴근') { const m = T(r.planEnd) - T(r.to); return { change, amount: '단축 ' + D(m), short: '−' + D(m), extMin: 0 }; }
+      if (r.reason === '지각') { const m = T(r.from) - T(r.planStart); return { change, amount: '지각 ' + D(m), short: '지각 ' + D(m), extMin: 0 }; }
+      const len = T(r.to) - T(r.from); const diff = len - planLen;
+      return { change, amount: '근무 ' + D(len) + ' (계획 대비 ' + (diff >= 0 ? '+' : '−') + D(Math.abs(diff)) + ')', short: (diff >= 0 ? '+' : '−') + D(Math.abs(diff)), extMin: Math.max(0, diff) };
+    };
+
+    const pendingReqs = s.requests.filter(isPend);
+
+    const navDefs = [
+      ['s1', 'S1', '연장·변경 신청', '스텝 · 휴대폰'],
+      ['s2', 'S2', '내 신청 현황', '스텝 · 휴대폰'],
+      ['s3', 'S3', '승인 요청 상세', '승인자 · 휴대폰'],
+      ['s4', 'S4', '미승인 목록', '승인자 · 휴대폰'],
+      ['s5', 'S5', '일일 근태 대조', '인턴매니저 · PC'],
+      ['s6', 'S6', '지문 누락 처리', '인턴매니저 · PC'],
+      ['s7', 'S7', '연장·변경 검토', '슈퍼바이저 · PC']
+    ];
+    const navItems = navDefs.map((d) => {
+      const on = s.screen === d[0];
+      const badge = d[0] === 's4' ? pendingReqs.length : 0;
+      return {
+        code: d[1], label: d[2], role: d[3], go: go(d[0]),
+        hasBadge: badge > 0, badge: String(badge),
+        style: 'display: flex; align-items: center; gap: 10px; width: 100%; min-height: 56px; padding: 8px 12px; box-sizing: border-box; border-radius: 10px; border: 1px solid ' + (on ? '#1d4ed8' : 'transparent') + '; background: ' + (on ? '#eff4ff' : 'transparent') + '; text-align: left; font: inherit; color: #1a1a1a; cursor: pointer'
+      };
+    });
+
+    // S1: 사유에 따라 바뀌는 신청 화면 (U1, U2, U3)
+    const P0 = '11:00', P1 = '20:00';
+    const R = s.reason;
+    const defaults = {
+      '연장근무': { start: P0, end: '21:40' }, '조기퇴근': { start: P0, end: '19:00' },
+      '지각': { start: '11:30', end: P1 }, '사전협의 변경': { start: '10:30', end: '20:30' },
+      '결근': { start: P0, end: P1 }, '신규입사': { start: '13:00', end: '21:00' }
+    };
+    const reasonList = ['연장근무', '조기퇴근', '지각', '사전협의 변경', '결근', '신규입사'];
+    const reasons = reasonList.map((r) => ({ label: r, style: pill(R === r), pick: () => this.setState(Object.assign({ reason: r }, defaults[r])) }));
+    const showStart = ['지각', '사전협의 변경', '신규입사'].indexOf(R) >= 0;
+    const showEnd = ['연장근무', '조기퇴근', '사전협의 변경', '신규입사'].indexOf(R) >= 0;
+    const shift = (field, d) => () => {
+      const v = Math.min(23 * 60 + 55, Math.max(6 * 60, T(s[field]) + d));
+      const o = {}; o[field] = F(v); this.setState(o);
+    };
+    const steps = (field) => ({
+      down: [{ label: '−30분', aria: '30분 앞당기기', go: shift(field, -30) }, { label: '−5분', aria: '5분 앞당기기', go: shift(field, -5) }],
+      up: [{ label: '+5분', aria: '5분 늦추기', go: shift(field, 5) }, { label: '+30분', aria: '30분 늦추기', go: shift(field, 30) }]
+    });
+    const quick = (field, list) => list.map((q) => ({ label: q[1], style: pill(s[field] === q[0]), pick: () => { const o = {}; o[field] = q[0]; this.setState(o); } }));
+    const startQuickMap = { '지각': [['11:10', '11:10'], ['11:30', '11:30'], ['12:00', '12:00']], '사전협의 변경': [['10:00', '10:00'], ['10:30', '10:30'], ['11:00', '11:00']], '신규입사': [['12:00', '12:00'], ['13:00', '13:00'], ['14:00', '14:00']] };
+    const endQuickMap = {
+      '연장근무': [['21:25', '지금 퇴근 (21:25)'], ['20:30', '20:30'], ['21:00', '21:00'], ['22:00', '22:00']],
+      '조기퇴근': [['18:00', '18:00'], ['19:00', '19:00'], ['19:30', '19:30']],
+      '사전협의 변경': [['20:00', '20:00'], ['20:30', '20:30'], ['21:00', '21:00']],
+      '신규입사': [['20:00', '20:00'], ['21:00', '21:00'], ['22:00', '22:00']]
+    };
+    const st = T(s.start), en = T(s.end);
+    let resultLabel = '', resultValue = '', resultSub = '', err = '';
+    if (R === '연장근무') {
+      resultLabel = '연장시간 (자동 계산)';
+      if (en <= T(P1)) err = '연장근무는 계획 퇴근 20:00보다 늦어야 합니다. 일찍 끝났다면 "조기퇴근"을 고르세요.';
+      resultValue = err ? '—' : D(en - T(P1)); resultSub = '퇴근 20:00 → ' + s.end;
+    } else if (R === '조기퇴근') {
+      resultLabel = '단축시간 (자동 계산)';
+      if (en >= T(P1)) err = '조기퇴근은 계획 퇴근 20:00보다 빨라야 합니다. 늦게 끝났다면 "연장근무"를 고르세요.';
+      resultValue = err ? '—' : D(T(P1) - en); resultSub = '퇴근 20:00 → ' + s.end;
+    } else if (R === '지각') {
+      resultLabel = '지각 시간 (자동 계산)';
+      if (st <= T(P0)) err = '지각은 계획 출근 11:00보다 늦어야 합니다.';
+      resultValue = err ? '—' : D(st - T(P0)); resultSub = '출근 11:00 → ' + s.start;
+    } else if (R === '결근') {
+      resultLabel = '결근'; resultValue = '근무 없음'; resultSub = '시각 없이 사유만 기록해 승인자에게 보냅니다.';
+    } else {
+      resultLabel = '변경 후 근무시간 (자동 계산, 휴게 포함)';
+      if (en <= st) err = '퇴근 시각이 출근 시각보다 늦어야 합니다.';
+      const diff = (en - st) - (T(P1) - T(P0));
+      resultValue = err ? '—' : D(en - st);
+      resultSub = R === '신규입사' ? ('첫 근무 ' + s.start + '–' + s.end) : ('11:00–20:00 → ' + s.start + '–' + s.end + ' · 계획 대비 ' + (diff >= 0 ? '+' : '−') + D(Math.abs(diff)));
+    }
+    const blockMsg = err || (!s.agreed ? '동의에 체크해야 신청할 수 있습니다.' : '');
+    const submitDisabled = !!err || !s.agreed;
+    const submit = () => {
+      if (submitDisabled) return;
+      const reqs = s.requests.filter((r) => r.who !== 'A');
+      reqs.unshift({
+        id: 'rA', who: 'A', reason: R, planStart: P0, planEnd: P1,
+        from: showStart ? s.start : P0, to: R === '결근' ? '' : (showEnd ? s.end : P1),
+        status: '신청됨', approver: '', at: '', rejectReason: '', proxy: !!s.proxy, proxyChecked: false
+      });
+      const conf = Object.assign({}, s.confirmed); delete conf.A;
+      const ch = Object.assign({}, s.choice); delete ch.A;
+      const df = Object.assign({}, s.deferred); delete df.A;
+      const back = s.proxy ? 's5' : 's2';
+      const msg = s.proxy ? '직원 A 대신 신청했습니다. 직원 A가 S2에서 확인하고, 승인자에게 알림이 갔습니다.' : '신청했습니다. 승인자에게 알림을 보냈습니다.';
+      this.setState({ requests: reqs, screen: back, agreed: false, rejectReason: '', confirmed: conf, choice: ch, deferred: df, closed: false, reviewed: false, proxy: false, resubmitNote: '', toast: { screen: back, text: msg } });
+    };
+    const sSteps = steps('start'), eSteps = steps('end');
+
+    // S2
+    const statusChip = (st2) => st2 === '승인됨' ? chip('ok') : (st2 === '반려됨' || st2 === '미승인') ? chip('warn') : chip('pend');
+    const myReqs = s.requests.filter((r) => r.who === 'A').map((r) => {
+      const d = describe(r);
+      return {
+        reason: r.reason, status: r.status, chipStyle: statusChip(r.status),
+        change: d.change, amount: d.amount, approver: r.approver, at: r.at,
+        isApproved: r.status === '승인됨', isRejected: r.status === '반려됨', rejectReason: r.rejectReason,
+        canCancel: isPend(r),
+        cancel: () => this.setState({ requests: s.requests.filter((x) => x.id !== r.id), toast: { screen: 's2', text: '신청을 취소했습니다. 승인자에게도 취소가 알려집니다.' } }),
+        proxyPending: !!r.proxy && !r.proxyChecked, proxyDone: !!r.proxy && !!r.proxyChecked,
+        proxyConfirm: () => this.setState({ requests: s.requests.map((x) => x.id === r.id ? Object.assign({}, x, { proxyChecked: true }) : x) }),
+        resubmit: () => this.setState({ screen: 's1', toast: null, agreed: false, proxy: false, resubmitNote: r.rejectReason, reason: r.reason, start: r.from || P0, end: r.to || P1 })
+      };
+    });
+
+    // S3
+    const target = pendingReqs.find((r) => r.who === 'A') || pendingReqs[0] || null;
+    const td = target ? describe(target) : null;
+    const t = target ? { who: '직원 ' + target.who, reason: target.reason, change: td.change, amount: td.amount } : { who: '', reason: '', change: '', amount: '' };
+    const approve = () => {
+      if (!target) return;
+      const reqs = s.requests.map((r) => r.id === target.id ? Object.assign({}, r, { status: '승인됨', approver: '점장', at: '20:05' }) : r);
+      this.setState({ requests: reqs, rejectReason: '', lastApproval: { id: target.id, prev: target.status }, toast: { screen: 's4', undo: true, text: '직원 ' + target.who + ' 신청을 승인했습니다. 승인자와 시각이 기록됐습니다.' }, screen: 's4' });
+    };
+    const rejectReasons = ['시각 확인 필요', '사전 협의 없음'].map((x) => ({ label: x, style: pill(s.rejectReason === x), pick: () => this.setState({ rejectReason: x }) }));
+    const reject = () => {
+      if (!target || !s.rejectReason) return;
+      const reqs = s.requests.map((r) => r.id === target.id ? Object.assign({}, r, { status: '반려됨', rejectReason: s.rejectReason }) : r);
+      const toScreen = target.who === 'A' ? 's2' : 's4';
+      this.setState({ requests: reqs, rejectReason: '', screen: toScreen, toast: { screen: toScreen, text: '반려했습니다. 신청자에게 사유와 함께 알림을 보냈습니다.' } });
+    };
+
+    // S4
+    const pendingItems = pendingReqs.map((r) => {
+      const d = describe(r);
+      return {
+        who: '직원 ' + r.who, reason: r.reason, status: r.status, chipStyle: statusChip(r.status),
+        change: d.change, amount: d.amount, checked: !!s.checked[r.id],
+        toggle: () => { const c = Object.assign({}, s.checked); c[r.id] = !c[r.id]; this.setState({ checked: c }); }
+      };
+    });
+    const checkedIds = pendingReqs.filter((r) => s.checked[r.id]).map((r) => r.id);
+    const bulkApprove = () => {
+      if (!checkedIds.length) return;
+      const reqs = s.requests.map((r) => checkedIds.indexOf(r.id) >= 0 ? Object.assign({}, r, { status: '승인됨', approver: '점장', at: '20:30' }) : r);
+      this.setState({ requests: reqs, checked: {}, toast: { screen: 's4', text: checkedIds.length + '건을 일괄 승인했습니다.' } });
+    };
+
+    // S5 (U4: 막는 줄 표시, 다음 날로 넘기기)
+    const staff = [
+      { id: 'A', plan: ['11:00', '20:00'], fp: ['10:58', '21:41'] },
+      { id: 'B', plan: ['09:30', '18:30'], fp: ['09:23', '19:31'] },
+      { id: 'C', plan: ['12:00', '21:00'], fp: ['', '21:05'] },
+      { id: 'D', plan: ['11:30', '20:30'], fp: ['11:28', '21:31'] },
+      { id: 'E', plan: ['10:30', '19:30'], fp: ['10:27', '22:20'] },
+      { id: 'F', plan: ['13:00', '21:00'], fp: ['12:51', '21:04'] },
+      { id: 'G', plan: ['12:00', '21:00'], fp: ['11:57', '21:12'] }
+    ];
+    const allRows = staff.map((p) => {
+      const req = s.requests.find((r) => r.who === p.id);
+      const approved = req && req.status === '승인됨';
+      const pending = req && isPend(req);
+      const absent = approved && req.reason === '결근';
+      let start = approved && !absent ? req.from : p.plan[0];
+      let status, end = null, pickA = null, pickB = null, pickALabel = '', pickBLabel = '';
+      const baseEnd = approved && !absent ? req.to : p.plan[1];
+      const pickOne = (v) => () => {
+        const ch = Object.assign({}, s.choice); ch[p.id] = v;
+        const cf = Object.assign({}, s.confirmed); cf[p.id] = true;
+        this.setState({ choice: ch, confirmed: cf });
+      };
+      if (p.id === 'C' && !s.fixedC) {
+        status = 'missing';
+      } else if (pending) {
+        status = 'pending';
+      } else if (s.choice[p.id]) {
+        status = 'ok'; end = s.choice[p.id];
+      } else if (absent) {
+        status = 'diff'; pickALabel = '결근 처리'; pickBLabel = '지문대로 근무';
+        pickA = pickOne('ABSENT'); pickB = pickOne(p.fp[1]);
+      } else if (Math.abs(T(p.fp[1]) - T(baseEnd)) <= 5) {
+        status = 'ok'; end = baseEnd;
+      } else {
+        status = 'diff';
+        pickALabel = (approved ? '신청 ' : '계획 ') + baseEnd;
+        pickBLabel = '지문 ' + p.fp[1];
+        pickA = pickOne(baseEnd); pickB = pickOne(p.fp[1]);
+      }
+      if (p.id === 'C' && s.fixedC) start = s.cPick;
+      const isConfirmed = !!s.confirmed[p.id];
+      const isDeferred = status === 'pending' && !!s.deferred[p.id];
+      const labels = { ok: '일치', missing: '지문 누락', pending: isDeferred ? '다음 날 처리' : '미승인', diff: '시각 차이' };
+      const suggest = status === 'ok' ? (end === 'ABSENT' ? '결근' : start + '–' + end) : status === 'diff' ? '선택 필요' : status === 'pending' ? '승인 대기' : '근거 필요';
+      const reqText = !req ? '없음' : (req.reason === '결근' ? '결근' : req.to) + ' ' + (approved ? '승인' : req.status === '반려됨' ? '반려' : '대기');
+      return {
+        id: p.id, status, isConfirmed, isDeferred, end,
+        resolved: (status === 'ok' && isConfirmed) || isDeferred,
+        plan: p.plan[0] + '–' + p.plan[1],
+        fp: (p.fp[0] || '—') + ' / ' + p.fp[1],
+        req: reqText, suggest, statusLabel: labels[status],
+        chipStyle: status === 'ok' ? chip('ok') : status === 'pending' ? chip('pend') : chip('warn'),
+        canFix: status === 'missing',
+        canRemind: status === 'pending' && !isDeferred && !s.reminded[p.id],
+        wasReminded: status === 'pending' && !isDeferred && !!s.reminded[p.id],
+        remind: () => { const rm = Object.assign({}, s.reminded); rm[p.id] = true; this.setState({ reminded: rm }); },
+        canDefer: status === 'pending' && !isDeferred,
+        defer: () => { const df = Object.assign({}, s.deferred); df[p.id] = true; this.setState({ deferred: df }); },
+        canPick: status === 'diff' && !isConfirmed,
+        pickA: pickA, pickB: pickB, pickALabel, pickBLabel,
+        canRepick: !!s.choice[p.id] && !s.closed,
+        repick: () => {
+          const ch = Object.assign({}, s.choice); delete ch[p.id];
+          const cf = Object.assign({}, s.confirmed); delete cf[p.id];
+          this.setState({ choice: ch, confirmed: cf });
+        },
+        canProxy: p.id === 'A' && !req && status === 'diff' && !isConfirmed,
+        proxyGo: () => this.setState(Object.assign({ screen: 's1', toast: null, proxy: true, agreed: false, resubmitNote: '', reason: '연장근무' }, { start: P0, end: '21:40' }))
+      };
+    });
+    const rows = s.onlyIssues ? allRows.filter((r) => r.status !== 'ok') : allRows;
+    const okRows = allRows.filter((r) => r.status === 'ok');
+    const okUnconfirmed = okRows.filter((r) => !r.isConfirmed).length;
+    const blockers = allRows.filter((r) => !r.resolved);
+    const blockerWhy = (r) => r.status === 'ok' ? '확정 전' : r.status === 'missing' ? '지문 누락' : r.status === 'pending' ? '미승인' : '시각 선택 필요';
+    const blockerText = blockers.map((r) => '직원 ' + r.id + '(' + blockerWhy(r) + ')').join(', ');
+    const deferredRows = allRows.filter((r) => r.isDeferred);
+    const bulkConfirm = () => {
+      const cf = Object.assign({}, s.confirmed);
+      okRows.forEach((r) => { cf[r.id] = true; });
+      this.setState({ confirmed: cf });
+    };
+    const closeDay = () => {
+      if (blockers.length) return;
+      const extra = deferredRows.length ? ' · 다음 날 처리 ' + deferredRows.length + '건(' + deferredRows.map((r) => '직원 ' + r.id).join(', ') + ')' : '';
+      this.setState({ closed: true, toast: { screen: 's5', text: '일마감을 마쳤습니다' + extra + '. 확정 결과를 인사관리 시스템에 옮기면 됩니다.' } });
+    };
+
+    // S6
+    const cCandidates = [['12:00', '계획 출근 12:00']].concat(s.cRequested ? [['11:55', '직원 응답 11:55']] : []).map((c) => ({ label: c[1], style: pill(s.cPick === c[0]), pick: () => this.setState({ cPick: c[0] }) }));
+    const cReasons = ['지문 미인식', '지문 미등록', '기기 오류', '기타'].map((x) => ({ label: x, style: pill(s.cReason === x), pick: () => this.setState({ cReason: x }) }));
+    const cConfirmDisabled = !(s.cPick && s.cReason);
+    const cConfirm = () => {
+      if (cConfirmDisabled) return;
+      this.setState({ fixedC: true, screen: 's5', toast: { screen: 's5', text: '직원 C 출근 ' + s.cPick + ' 확정 · 누락 사유: ' + s.cReason } });
+    };
+
+    // S7
+    const shown = (v) => v === 'ABSENT' ? '결근' : v;
+    const weekRows = [
+      { key: 'w1', date: '8/10', who: 'B', reason: '연장근무', ext: '+1시간', extMin: 60, approver: '점장', at: '19:40', reqTo: '19:30', entered: '19:30' },
+      { key: 'w2', date: '8/11', who: 'E', reason: '연장근무', ext: '+2시간 43분', extMin: 163, approver: '인사담당자', at: '21:05', reqTo: '22:13', entered: '22:15' },
+      { key: 'w3', date: '8/11', who: 'D', reason: '사전협의 변경', ext: '+30분', extMin: 30, approver: '점장', at: '15:00', reqTo: '21:00', entered: '21:00' }
+    ];
+    const todayRows = s.requests.filter((r) => r.status === '승인됨').map((r) => {
+      const row = allRows.find((x) => x.id === r.who);
+      const d = describe(r);
+      return {
+        key: 't' + r.id, date: '8/12', who: r.who, reason: r.reason, ext: d.short, extMin: d.extMin,
+        approver: r.approver, at: r.at, reqTo: r.reason === '결근' ? 'ABSENT' : r.to,
+        entered: row && row.isConfirmed && row.end ? row.end : ''
+      };
+    });
+    const rawReview = s.range === 'week' ? weekRows.concat(todayRows) : todayRows;
+    const reviewRows = rawReview.map((v) => {
+      const before = !v.entered;
+      const match = !before && v.entered === v.reqTo;
+      const sent = !!s.fixSent[v.key];
+      return {
+        date: v.date, who: v.who, reason: v.reason, ext: v.ext, approver: v.approver, at: v.at,
+        compare: shown(v.reqTo) + ' → ' + (before ? '입력 전' : shown(v.entered)),
+        matchLabel: before ? '입력 전' : match ? '일치' : '불일치',
+        chipStyle: before ? chip('pend') : match ? chip('ok') : chip('warn'),
+        canRequestFix: !before && !match && !sent, fixSent: !before && !match && sent,
+        requestFix: () => { const f = Object.assign({}, s.fixSent); f[v.key] = true; this.setState({ fixSent: f }); },
+        _before: before, _blocking: before || (!match && !sent), _ext: v.extMin
+      };
+    });
+    const beforeEntryCount = reviewRows.filter((r) => r._before).length;
+    const reviewBlocked = reviewRows.some((r) => r._blocking) || reviewRows.length === 0;
+    const extTotal = D(reviewRows.reduce((a, r) => a + r._ext, 0));
+    const ranges = [['today', '오늘 (8/12)'], ['week', '이번 주']].map((r) => ({ label: r[1], style: pill(s.range === r[0]), pick: () => this.setState({ range: r[0] }) }));
+
+    const notes = {
+      s1: { title: 'S1 연장·변경 신청', user: '스텝 · 마감 직후 주방에서 휴대폰으로', job: 'J1 마감 연장 기록', pain: '종이 동의서에 시각과 연장시간을 직접 계산해 적고 서명해야 함', tryIt: '사유를 바꿔 보세요. 연장근무·조기퇴근은 퇴근 시각, 지각은 출근 시각, 사전협의 변경은 둘 다 바뀌고, 결근은 시각 없이 사유만 남습니다. ±5분·±30분 버튼으로 실제 시각을 맞출 수 있습니다.' },
+      s2: { title: 'S2 내 신청 현황', user: '스텝 · 신청 직후 또는 결과 알림을 받았을 때', job: 'J1 마감 연장 기록', pain: '종이를 내고 나면 처리됐는지 알 수 없음', tryIt: '신청 상태를 확인하세요. 승인 전이면 신청을 취소할 수 있고, 반려되면 이전 내용이 채워진 채로 다시 신청할 수 있습니다. 인턴매니저가 대신 입력한 신청은 여기서 확인합니다.' },
+      s3: { title: 'S3 승인 요청 상세', user: '승인자(점장 또는 인사담당자) · 영업 중 휴대폰으로', job: 'J2 변경·연장 승인', pain: '종이 확인 칸에 서명할 타이밍을 놓쳐 비워 두게 됨', tryIt: '승인하면 승인자와 시각이 자동으로 남습니다. 잘못 눌렀다면 다음 화면의 "되돌리기"로 취소할 수 있습니다. 반려하려면 사유를 먼저 고르세요.' },
+      s4: { title: 'S4 미승인 목록', user: '승인자 · 마감 무렵', job: 'J2 변경·연장 승인', pain: '놓친 신청을 나중에 몰아 보거나 비워 둠', tryIt: '놓친 신청을 골라 한 번에 승인하세요.' },
+      s5: { title: 'S5 일일 근태 대조', user: '인턴매니저 · 마감 후 밤 9시 이후 매장 PC', job: 'J3 매일 밤 근태 대조·입력', pain: '지문·종이 근무표·종이 동의서·카톡 일일보고 네 곳을 맞춰 봐야 함', tryIt: '아래에 마감을 막는 줄이 표시됩니다. 일치하는 줄은 한 번에 확정하고, 시각 차이는 하나를 고르고, 지문 누락은 S6에서 처리하세요. 승인자가 처리하지 않은 미승인 건은 "다음 날로 넘기기"로 오늘 마감할 수 있습니다. 잘못 고른 시각은 "다시 선택", 신청 없이 늦게 퇴근한 직원은 "대리 신청"으로 처리합니다.' },
+      s6: { title: 'S6 지문 누락 처리', user: '인턴매니저 · S5에서 지문 누락을 눌렀을 때', job: 'J4 지문 누락 처리', pain: '근거가 종이와 카톡에 흩어져 있고 직원에게 따로 물어야 함', tryIt: '근거 후보에서 시각을 고르고 누락 사유를 선택하세요. 근거가 부족하면 직원에게 확인 요청을 보내 보세요.' },
+      s7: { title: 'S7 연장·변경 검토', user: '슈퍼바이저 · 정기 검토 때 PC', job: 'J5 입력 결과 검토', pain: '사유·승인자가 종이에만 있어 다시 뒤져야 하고, 승인 칸이 비어 있음', tryIt: '기간을 "이번 주"로 바꿔 보세요. 신청과 입력값이 다른 줄은 수정 요청을 보내야 검토를 완료할 수 있습니다.' }
+    };
+
+    const phoneTitles = { s1: '근무 변경 신청', s2: '내 신청 현황', s3: '승인 요청', s4: '미승인 목록' };
+    const phoneWho = { s1: '직원 A (나)', s2: '직원 A (나)', s3: '점장', s4: '점장' };
+    const pcTitles = { s5: '8월 12일 일일 근태 대조', s6: '지문 누락 처리', s7: '연장·변경 검토' };
+    const pcWho = { s5: '인턴매니저', s6: '인턴매니저', s7: '슈퍼바이저' };
+    const isPhone = ['s1', 's2', 's3', 's4'].indexOf(s.screen) >= 0;
+    const toastShow = !!(s.toast && s.toast.screen === s.screen);
+    const errBox = !!err;
+
+    return {
+      navItems, reset: () => this.setState(this.initial()),
+      canUndo: toastShow && !!s.toast.undo && !!s.lastApproval,
+      undo: () => {
+        const la = s.lastApproval; if (!la) return;
+        const reqs = s.requests.map((r) => r.id === la.id ? Object.assign({}, r, { status: la.prev, approver: '', at: '' }) : r);
+        this.setState({ requests: reqs, lastApproval: null, toast: { screen: 's4', text: '승인을 되돌렸습니다. 다시 미승인 목록에 있습니다.' } });
+      },
+      proxyMode: !!s.proxy, hasResubmitNote: !!s.resubmitNote, resubmitNote: s.resubmitNote,
+      isPhone, isPc: !isPhone,
+      phoneTitle: phoneTitles[s.screen] || '',
+      phoneWho: s.screen === 's1' && s.proxy ? '인턴매니저 (대리 입력)' : (phoneWho[s.screen] || ''),
+      pcTitle: pcTitles[s.screen] || '', pcWho: pcWho[s.screen] || '',
+      toastShow, toastText: toastShow ? s.toast.text : '',
+      isS1: s.screen === 's1', isS2: s.screen === 's2', isS3: s.screen === 's3', isS4: s.screen === 's4',
+      isS5: s.screen === 's5', isS6: s.screen === 's6', isS7: s.screen === 's7',
+      goS1: go('s1'), goS5: go('s5'), goS6: go('s6'),
+      reasons, showStart, showEnd,
+      startTitle: R === '지각' ? '실제 출근 시각' : '변경 후 출근 시각',
+      endTitle: R === '조기퇴근' ? '실제 퇴근 시각 (앞당기기)' : R === '연장근무' ? '실제 퇴근 시각' : '변경 후 퇴근 시각',
+      startValue: s.start, endValue: s.end,
+      startDown: sSteps.down, startUp: sSteps.up, endDown: eSteps.down, endUp: eSteps.up,
+      startQuick: quick('start', startQuickMap[R] || []), endQuick: quick('end', endQuickMap[R] || []),
+      resultLabel, resultValue, resultSub,
+      resultBoxStyle: 'padding: 16px; border-radius: 12px; border: 1px solid ' + (errBox ? '#e8c39a' : '#c9d6f5') + '; background: ' + (errBox ? '#fffaf3' : '#f5f8ff') + '; display: flex; flex-direction: column; gap: 4px',
+      resultValueStyle: 'font-size: 26px; color: ' + (errBox ? '#9a4a00' : '#1d4ed8'),
+      agreed: s.agreed, toggleAgree: () => this.setState({ agreed: !s.agreed }),
+      hasBlockMsg: !!blockMsg, blockMsg,
+      submit, submitDisabled, submitStyle: primary(submitDisabled),
+      myReqs, noMyReqs: myReqs.length === 0,
+      hasTarget: !!target, noTarget: !target, t, approve, rejectReasons, reject,
+      rejectDisabled: !s.rejectReason, rejectStyle: secondary(!s.rejectReason),
+      pendingItems, pendingCount: String(pendingReqs.length), noPending: pendingReqs.length === 0,
+      checkedCount: String(checkedIds.length), bulkApprove,
+      bulkDisabled: checkedIds.length === 0, bulkStyle: primary(checkedIds.length === 0),
+      rows, rowCount: String(allRows.length), okCount: String(okRows.length),
+      issueCount: String(allRows.length - okRows.length),
+      resolvedCount: String(allRows.length - blockers.length),
+      toggleIssues: () => this.setState({ onlyIssues: !s.onlyIssues }),
+      issuesLabel: s.onlyIssues ? '전체 보기' : '확인 필요만 보기',
+      okUnconfirmed: String(okUnconfirmed), bulkConfirm,
+      bulkConfirmDisabled: okUnconfirmed === 0, bulkConfirmStyle: primary(okUnconfirmed === 0),
+      hasBlockers: blockers.length > 0, noBlockers: blockers.length === 0,
+      blockerCount: String(blockers.length), blockerText,
+      closeDay, closeDisabled: blockers.length > 0 || s.closed,
+      closeStyle: secondary(blockers.length > 0 || s.closed),
+      closeLabel: s.closed ? '일마감 완료' : blockers.length ? '일마감 (남은 ' + blockers.length + '건)' : '일마감',
+      cDone: s.fixedC, cOpen: !s.fixedC, cCandidates, cReasons,
+      cCanRequest: !s.cRequested, cRequested: s.cRequested,
+      cRequest: () => this.setState({ cRequested: true }),
+      cConfirm, cConfirmDisabled, cConfirmStyle: primary(cConfirmDisabled),
+      cPickLabel: s.cPick, cReasonLabel: s.cReason,
+      ranges, reviewRows, reviewRowCount: String(reviewRows.length), extTotal,
+      hasBeforeEntry: beforeEntryCount > 0, beforeEntryCount: String(beforeEntryCount),
+      reviewDone: () => { if (!reviewBlocked) this.setState({ reviewed: true }); },
+      reviewDisabled: reviewBlocked || s.reviewed, reviewStyle: primary(reviewBlocked || s.reviewed),
+      reviewLabel: s.reviewed ? '검토 완료됨' : '검토 완료',
+      note: notes[s.screen]
+    };
+  }
+}
+</script>
+</body>
+</html>
