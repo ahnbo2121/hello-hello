@@ -43,6 +43,8 @@ cd hello-hello
 
 ```
 hello-hello/
+├── docs/
+│   └── 수기업무-조사.md   # 1단계: 수기 근태 업무 조사 양식
 ├── .gitignore
 ├── LICENSE
 └── README.md
