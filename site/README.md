@@ -1,10 +1,10 @@
-# 링크 페이지 원본
+﻿# 링크 페이지 원본
 
 링크로 공유하는 두 페이지의 원본 파일입니다. 링크 페이지는 claude.ai에 올라가 있고, 이 폴더는 나중에 고칠 때 쓰는 백업입니다.
 
 | 파일 | 링크 페이지 | 내용 |
 |---|---|---|
-| `사례-페이지.html` | https://claude.ai/artifact/LLnyTqZ38JW79aUtDWTaFB | 포트폴리오 사례 소개 페이지 (버전 2) |
+| `사례-페이지.html` | https://claude.ai/artifact/LLnyTqZ38JW79aUtDWTaFB | 포트폴리오 사례 소개 페이지 (버전 3) |
 | `wireframe/project/canvas.json`, `wireframe/project/Main.dc.html` | https://claude.ai/artifact/8VcacdESZg8mKSicw4GsTw | 클릭 가능한 와이어프레임 S1~S7 (버전 5) |
 
 ## 알아 둘 점

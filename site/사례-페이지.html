@@ -144,7 +144,60 @@ section { display: flex; flex-direction: column; gap: 20px; }
 .limits { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 6px; }
 footer { border-top: 1px solid var(--rule); padding-top: 20px; font-size: 13px; color: var(--muted); display: flex; flex-direction: column; gap: 6px; }
 
+/* screen mockups (redrawn from the wireframe) */
+.shots { display: flex; flex-wrap: wrap; gap: 20px; align-items: flex-start; }
+.shot { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.shot-label { font-size: 13px; color: var(--muted); }
+.shot-label b { color: var(--ink); font-family: var(--font-mono); font-weight: 500; margin-right: 6px; }
+.phone { width: 300px; max-width: 100%; border: 1px solid var(--rule); border-radius: 28px; background: var(--sheet); overflow: hidden; font-size: 12.5px; line-height: 1.5; }
+.phone-top { display: flex; justify-content: space-between; align-items: center; padding: 12px 18px; border-bottom: 1px solid var(--rule); }
+.phone-top b { font-size: 14px; }
+.phone-top span { font-size: 11px; color: var(--muted); }
+.phone-body { padding: 14px; display: flex; flex-direction: column; gap: 10px; }
+.m-box { background: var(--paper); border-radius: 10px; padding: 8px 12px; display: flex; flex-direction: column; }
+.m-box small { color: var(--muted); font-size: 11px; }
+.m-label { font-weight: 700; font-size: 12px; }
+.pills { display: flex; flex-wrap: wrap; gap: 5px; }
+.pill { border: 1px solid var(--rule); border-radius: 999px; padding: 3px 9px; font-size: 11.5px; background: var(--sheet); }
+.pill.on { border-color: var(--blue); background: var(--blue-soft); color: var(--blue); font-weight: 700; }
+.stepper { display: flex; align-items: center; gap: 4px; }
+.stepper span { border: 1px solid var(--rule); border-radius: 7px; padding: 3px 6px; font-size: 11px; }
+.stepper b { flex: 1; text-align: center; font-size: 18px; font-variant-numeric: tabular-nums; }
+.result { border: 1px solid var(--blue); background: var(--blue-soft); border-radius: 10px; padding: 8px 12px; display: flex; flex-direction: column; }
+.result small { font-size: 11px; color: var(--muted); }
+.result b { font-size: 20px; color: var(--blue); font-variant-numeric: tabular-nums; }
+.result.bad { border-color: var(--pencil); background: var(--pencil-soft); }
+.result.bad b { color: var(--pencil); }
+.check { display: flex; gap: 6px; align-items: flex-start; font-size: 11.5px; }
+.check i { flex-shrink: 0; width: 14px; height: 14px; border-radius: 3px; border: 1.5px solid var(--blue); background: var(--blue); margin-top: 2px; }
+.m-btn { border-radius: 10px; padding: 9px; text-align: center; font-weight: 700; background: var(--blue); color: var(--sheet); }
+.m-btn.ghost { background: var(--sheet); color: var(--pencil); border: 1px solid var(--pencil); opacity: 0.45; }
+.m-banner { border-radius: 8px; padding: 7px 10px; background: var(--pencil-soft); color: var(--pencil); font-weight: 700; font-size: 12px; }
+.m-row { display: flex; justify-content: space-between; gap: 10px; }
+.m-row span:first-child { color: var(--muted); }
+.m-card { border: 1px solid var(--rule); border-radius: 10px; padding: 10px 12px; display: flex; flex-direction: column; gap: 4px; }
+.pc { border: 1px solid var(--rule); border-radius: 10px; background: var(--sheet); overflow: hidden; font-size: 12.5px; min-width: 620px; }
+.pc-top { display: flex; justify-content: space-between; padding: 10px 16px; border-bottom: 1px solid var(--rule); background: var(--paper); }
+.pc-top span { font-size: 11px; color: var(--muted); }
+.pc-body { padding: 12px 16px; display: flex; flex-direction: column; gap: 10px; }
+.chips { display: flex; gap: 6px; flex-wrap: wrap; }
+.chip { border-radius: 999px; padding: 2px 8px; font-size: 11.5px; font-weight: 700; white-space: nowrap; display: inline-block; }
+.chip.ok { background: var(--blue-soft); color: var(--blue); }
+.chip.warn { background: var(--pencil-soft); color: var(--pencil); }
+.chip.pend { background: var(--grid); color: var(--ink); }
+.grid-t { display: grid; grid-template-columns: 34px 86px 92px 78px 86px 72px minmax(0, 1fr); gap: 6px; align-items: center; padding: 7px 8px; border-top: 1px solid var(--rule); font-variant-numeric: tabular-nums; }
+.grid-t.head { border-top: 0; background: var(--paper); font-weight: 700; font-size: 11px; color: var(--muted); border-radius: 6px; }
+.act { display: flex; gap: 4px; flex-wrap: wrap; }
+.act span { border: 1px solid var(--blue); color: var(--blue); border-radius: 6px; padding: 1px 6px; font-size: 11px; white-space: nowrap; }
+.act span.w { border-color: var(--pencil); color: var(--pencil); }
+.act span.g { border-color: var(--rule); color: var(--ink); }
+.blockers { font-size: 12px; color: var(--pencil); font-weight: 700; }
+.vs { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 20px; }
+.vs .shot { align-items: center; }
+.vs .verdict { font-size: 13px; max-width: 300px; }
+
 @media (max-width: 720px) {
+  .vs { grid-template-columns: minmax(0, 1fr); }
   .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .notes, .chain, .ba, .skills { grid-template-columns: minmax(0, 1fr); }
   .sources { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -265,6 +318,67 @@ footer { border-top: 1px solid var(--rule); padding-top: 20px; font-size: 13px; 
         </ol>
       </div>
     </div>
+    <h3>핵심 화면</h3>
+    <p class="caption">와이어프레임 화면을 이 페이지에 맞게 다시 그렸습니다. 이름과 시각은 모두 가상입니다.</p>
+    <div class="shots">
+      <figure class="shot" style="margin: 0">
+        <figcaption class="shot-label"><b>S1</b>스텝 · 마감 직후 연장 신청 (J1)</figcaption>
+        <div class="phone" role="img" aria-label="연장 신청 화면: 사유 연장근무, 실제 퇴근 21시 40분, 연장시간 1시간 40분 자동 계산, 동의 체크 후 신청하기">
+          <div class="phone-top"><b>근무 변경 신청</b><span>직원 A</span></div>
+          <div class="phone-body">
+            <div class="m-box"><small>오늘 내 근무</small><b>계획 11:00–20:00</b></div>
+            <span class="m-label">사유</span>
+            <div class="pills"><span class="pill on">연장근무</span><span class="pill">조기퇴근</span><span class="pill">지각</span><span class="pill">사전협의 변경</span><span class="pill">결근</span><span class="pill">신규입사</span></div>
+            <span class="m-label">실제 퇴근 시각</span>
+            <div class="stepper"><span>−30분</span><span>−5분</span><b>21:40</b><span>+5분</span><span>+30분</span></div>
+            <div class="pills"><span class="pill">지금 퇴근 (21:25)</span><span class="pill">21:00</span><span class="pill">22:00</span></div>
+            <div class="result"><small>연장시간 (자동 계산)</small><b>1시간 40분</b><small>퇴근 20:00 → 21:40</small></div>
+            <div class="check"><i></i><span>위 근로시간 변경에 동의합니다.</span></div>
+            <div class="m-btn">신청하기</div>
+          </div>
+        </div>
+      </figure>
+      <figure class="shot" style="margin: 0">
+        <figcaption class="shot-label"><b>S3</b>승인자 · 영업 중 알림으로 승인 (J2)</figcaption>
+        <div class="phone" role="img" aria-label="승인 요청 화면: 직원 A 연장근무 1시간 40분, 이번 주 누적 41시간 10분, 승인 버튼과 반려 사유 선택">
+          <div class="phone-top"><b>승인 요청</b><span>점장</span></div>
+          <div class="phone-body">
+            <div class="m-banner">승인 요청 1건 · 영업 중 알림</div>
+            <div class="m-card">
+              <div class="m-row"><span>신청자</span><b>직원 A</b></div>
+              <div class="m-row"><span>사유</span><b>연장근무</b></div>
+              <div class="m-row"><span>변경</span><b>11:00–21:40</b></div>
+              <div class="m-row"><span>변경 내용</span><b style="color: var(--blue)">연장 1시간 40분</b></div>
+              <small style="color: var(--muted); border-top: 1px solid var(--rule); padding-top: 6px; margin-top: 2px">이번 주 누적(가상) 41시간 10분 · 주 52시간 이내</small>
+            </div>
+            <div class="m-btn">승인</div>
+            <small style="color: var(--muted)">반려하려면 사유를 먼저 고르세요</small>
+            <div class="pills"><span class="pill">시각 확인 필요</span><span class="pill">사전 협의 없음</span></div>
+            <div class="m-btn ghost">반려</div>
+          </div>
+        </div>
+      </figure>
+    </div>
+    <figure class="shot" style="margin: 0">
+      <figcaption class="shot-label"><b>S5</b>인턴매니저 · 밤 근태 대조 (J3, J4). 한 줄에 계획·지문·승인된 신청이 모여, 네 곳을 뒤질 필요가 없습니다.</figcaption>
+      <div class="scroll">
+        <div class="pc" role="img" aria-label="일일 근태 대조 화면: 직원별 계획, 지문, 승인된 신청, 제안 인정시간, 상태. 일치, 지문 누락, 시각 차이, 미승인 상태와 처리 버튼, 마감을 막는 줄 3건 표시">
+          <div class="pc-top"><b>8월 12일 일일 근태 대조</b><span>인턴매니저 · 매장 PC</span></div>
+          <div class="pc-body">
+            <div class="chips"><span class="chip ok">일치 4</span><span class="chip warn">확인 필요 3</span><span class="chip pend">처리 완료 4/7</span></div>
+            <div>
+              <div class="grid-t head"><span>직원</span><span>계획</span><span>지문</span><span>승인된 신청</span><span>제안 인정</span><span>상태</span><span>처리</span></div>
+              <div class="grid-t"><b>A</b><span>11:00–20:00</span><span>10:58 / 21:41</span><span>21:40 승인</span><b>11:00–21:40</b><span><span class="chip ok">일치</span></span><span class="act" style="color: var(--blue); font-weight: 700">확정됨</span></div>
+              <div class="grid-t"><b>C</b><span>12:00–21:00</span><span>— / 21:05</span><span>없음</span><b>근거 필요</b><span><span class="chip warn">지문 누락</span></span><span class="act"><span class="w">누락 처리 →</span></span></div>
+              <div class="grid-t"><b>E</b><span>10:30–19:30</span><span>10:27 / 22:20</span><span>22:13 승인</span><b>선택 필요</b><span><span class="chip warn">시각 차이</span></span><span class="act"><span>신청 22:13</span><span>지문 22:20</span></span></div>
+              <div class="grid-t"><b>G</b><span>12:00–21:00</span><span>11:57 / 21:12</span><span>21:10 대기</span><b>승인 대기</b><span><span class="chip pend">미승인</span></span><span class="act"><span class="g">다시 알림</span><span class="g">다음 날로</span></span></div>
+            </div>
+            <span class="blockers">마감을 막는 줄 3건: 직원 C(지문 누락), 직원 E(시각 선택 필요), 직원 G(미승인)</span>
+          </div>
+        </div>
+      </div>
+    </figure>
+
     <h3>제안 화면 7개</h3>
     <div class="screens">
       <div class="screen"><b>S1</b>연장·변경 신청<small>스텝 · 휴대폰 · J1</small></div>
@@ -308,6 +422,40 @@ footer { border-top: 1px solid var(--rule); padding-top: 20px; font-size: 13px; 
         </tbody>
       </table>
     </div>
+    <h3>고친 예: S1에서 "조기퇴근"을 골랐을 때 (U1)</h3>
+    <div class="vs">
+      <figure class="shot" style="margin: 0">
+        <figcaption class="shot-label"><b>Before</b>점검 전 (버전 2)</figcaption>
+        <div class="phone" role="img" aria-label="점검 전 화면: 조기퇴근을 골랐는데 퇴근 시각을 늦추는 선택지와 연장시간 1시간 40분이 계속 표시됨">
+          <div class="phone-top"><b>연장·변경 신청</b><span>직원 A</span></div>
+          <div class="phone-body">
+            <span class="m-label">사유</span>
+            <div class="pills"><span class="pill">연장근무</span><span class="pill on">조기퇴근</span><span class="pill">사전협의 변경</span><span class="pill">지각</span></div>
+            <span class="m-label">변경 후 퇴근 시각</span>
+            <div class="pills"><span class="pill">20:30</span><span class="pill">21:00</span><span class="pill">21:10</span><span class="pill on">21:40</span><span class="pill">22:00</span></div>
+            <div class="result bad"><small>연장시간 (자동 계산)</small><b>1시간 40분</b><small>20:00 → 21:40</small></div>
+            <div class="m-btn">신청하기</div>
+          </div>
+        </div>
+        <p class="verdict caption">조기퇴근인데 늦은 시각만 고를 수 있고 "연장시간"이 계산됩니다. 그대로 신청하면 <b>잘못된 기록</b>이 남습니다.</p>
+      </figure>
+      <figure class="shot" style="margin: 0">
+        <figcaption class="shot-label"><b>After</b>고친 뒤 (버전 3 이후)</figcaption>
+        <div class="phone" role="img" aria-label="고친 뒤 화면: 조기퇴근을 고르면 퇴근 시각을 앞당기는 입력으로 바뀌고 단축시간 1시간이 계산됨">
+          <div class="phone-top"><b>근무 변경 신청</b><span>직원 A</span></div>
+          <div class="phone-body">
+            <span class="m-label">사유</span>
+            <div class="pills"><span class="pill">연장근무</span><span class="pill on">조기퇴근</span><span class="pill">지각</span><span class="pill">사전협의 변경</span></div>
+            <span class="m-label">실제 퇴근 시각 (앞당기기)</span>
+            <div class="stepper"><span>−30분</span><span>−5분</span><b>19:00</b><span>+5분</span><span>+30분</span></div>
+            <div class="result"><small>단축시간 (자동 계산)</small><b>1시간</b><small>퇴근 20:00 → 19:00</small></div>
+            <div class="m-btn">신청하기</div>
+          </div>
+        </div>
+        <p class="verdict caption">사유에 따라 바꾸는 시각과 계산 결과가 달라집니다. 사유와 시각이 맞지 않으면 신청을 막고 이유를 보여 줍니다.</p>
+      </figure>
+    </div>
+
     <p><span class="tag hypo">가설</span>도입하면 하루 대조 시간, 대조 자료 수(4곳 → 2곳 목표), 승인 공란 비율, 연장시간 표기 불일치 비율을 1~2주 측정해 비교할 계획입니다. 작성자는 지금 매장에서 근무하지 않아 실측값은 없습니다.</p>
   </section>
 
