@@ -27,9 +27,10 @@ cd hello-hello
 
 ```
 hello-hello/
+├── LICENSE
 └── README.md
 ```
 
 ## 라이선스
 
-(작성 예정)
+이 프로젝트는 [MIT 라이선스](LICENSE)를 따릅니다.
